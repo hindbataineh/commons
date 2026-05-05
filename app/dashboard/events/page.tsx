@@ -15,7 +15,6 @@ export default async function EventsPage() {
   if (!community) redirect("/onboarding");
 
   const events = await getAllEventsWithStats(supabase, community.id);
-  const today = new Date().toISOString().split("T")[0];
   const upcoming = events.filter((e) => !e.isPast);
   const past = events.filter((e) => e.isPast);
 
