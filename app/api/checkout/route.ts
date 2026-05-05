@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
       .eq("event_id", event_id)
       .eq("member_email", member_email)
       .eq("status", "confirmed")
-      .single();
+      .maybeSingle();
 
     if (existingBooking) {
       return NextResponse.json({ error: "You've already booked this event" }, { status: 400 });
