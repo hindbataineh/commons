@@ -50,7 +50,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Event is full" }, { status: 400 });
     }
 
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL!;
+    const origin =
+      req.headers.get("origin") ||
+      (req.headers.get("x-forwarded-host")
+        ? `https://${req.headers.get("x-forwarded-host")}`
+        : "https://commons-khaki.vercel.app");
 
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
@@ -78,8 +82,8 @@ export async function POST(req: NextRequest) {
         host_slug: community.slug,
         event_slug: event.slug,
       },
-      success_url: `${baseUrl}/${community.slug}/${event.slug}/confirmed?name=${encodeURIComponent(member_name)}`,
-      cancel_url: `${baseUrl}/${community.slug}/${event.slug}`,
+      success_url: `${origin}/${community.slug}/${event.slug}/confirmed?name=${encodeURIComponent(member_name)}`,
+      cancel_url: `${origin}/${community.slug}/${event.slug}`,
     });
 
     return NextResponse.json({ url: session.url });
