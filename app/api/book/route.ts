@@ -37,6 +37,18 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Community not found" }, { status: 404 });
     }
 
+    const { data: existingBooking } = await supabase
+      .from("bookings")
+      .select("id")
+      .eq("event_id", event_id)
+      .eq("member_email", member_email)
+      .eq("status", "confirmed")
+      .single();
+
+    if (existingBooking) {
+      return NextResponse.json({ error: "You've already booked this event" }, { status: 400 });
+    }
+
     const { count } = await supabase
       .from("bookings")
       .select("*", { count: "exact", head: true })

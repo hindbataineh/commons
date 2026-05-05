@@ -84,9 +84,15 @@ export default function BookingForm({ eventId, hostSlug, eventSlug, isFree, isFu
       />
 
       {error && (
-        <p className="text-sm text-red-500 bg-red-50 border border-red-200 rounded-lg px-4 py-3">
-          {error}
-        </p>
+        error.toLowerCase().includes("already booked") ? (
+          <p className="text-sm text-terracotta bg-terracotta/5 border border-terracotta/30 rounded-lg px-4 py-3">
+            You&rsquo;re already booked for this event.
+          </p>
+        ) : (
+          <p className="text-sm text-red-500 bg-red-50 border border-red-200 rounded-lg px-4 py-3">
+            {error}
+          </p>
+        )
       )}
 
       <Button type="submit" size="lg" loading={loading} className="w-full mt-2">
