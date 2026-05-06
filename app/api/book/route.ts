@@ -70,6 +70,9 @@ export async function POST(req: NextRequest) {
     });
 
     if (bookingError) {
+      if (bookingError.code === "23505") {
+        return NextResponse.json({ error: "You have already booked this event" }, { status: 400 });
+      }
       console.error("Booking insert error:", bookingError);
       return NextResponse.json({ error: "Failed to create booking" }, { status: 500 });
     }

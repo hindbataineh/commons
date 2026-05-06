@@ -100,6 +100,9 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ url: session.url });
   } catch (err) {
+    if (typeof err === "object" && err !== null && "code" in err && (err as { code: string }).code === "23505") {
+      return NextResponse.json({ error: "You have already booked this event" }, { status: 400 });
+    }
     console.error("Checkout route error:", err);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
