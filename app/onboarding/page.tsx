@@ -166,6 +166,7 @@ export default function OnboardingPage() {
       }
 
       console.log("[onboarding] done, redirecting to dashboard");
+      router.refresh();
       router.push("/dashboard");
     } catch (err) {
       console.error("[onboarding] unexpected error:", err);
