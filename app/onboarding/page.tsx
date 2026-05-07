@@ -82,75 +82,96 @@ export default function OnboardingPage() {
     setLoading(true);
     setError("");
 
-    const supabase = createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    try {
+      const supabase = createClient();
 
-    if (!user) {
-      setError("Not logged in. Please refresh and try again.");
+      console.log("[onboarding] getting user session...");
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+      if (userError) {
+        console.error("[onboarding] getUser error:", userError);
+      }
+
+      if (!user) {
+        console.error("[onboarding] no user — session likely expired");
+        router.push("/login?error=session_expired");
+        return;
+      }
+
+      console.log("[onboarding] user id:", user.id);
+
+      const priceFilsRaw = Math.round(parseFloat(event.priceAed || "0") * 100);
+      const priceFils = isNaN(priceFilsRaw) ? 0 : priceFilsRaw;
+
+      console.log("[onboarding] inserting community...", community.slug);
+      const { data: newCommunity, error: communityError } = await supabase
+        .from("communities")
+        .insert({
+          host_id: user.id,
+          name: community.name,
+          slug: community.slug,
+          type: community.type,
+          location: community.location,
+          description: community.description || null,
+          instagram_handle: community.instagram_handle || null,
+        })
+        .select("id")
+        .single();
+
+      if (communityError) {
+        console.error("[onboarding] community insert error:", communityError);
+        setError(
+          communityError.message.includes("unique")
+            ? `The URL "${community.slug}" is already taken. Edit it above.`
+            : `Community error: ${communityError.message} (code: ${communityError.code})`
+        );
+        setLoading(false);
+        setStep(1);
+        return;
+      }
+
+      console.log("[onboarding] community created:", newCommunity.id);
+      console.log("[onboarding] inserting event...", event.name);
+
+      const { error: eventError } = await supabase.from("events").insert({
+        community_id: newCommunity.id,
+        name: event.name,
+        slug: generateSlug(event.name),
+        location: event.location || community.location,
+        event_date: event.date,
+        event_time: event.time,
+        price: priceFils,
+        currency: "AED",
+        capacity: parseInt(event.capacity, 10),
+        is_recurring: event.repeat !== "one-off",
+        recurrence_rule: event.repeat === "one-off" ? null : event.repeat,
+        status: "active",
+      });
+
+      if (eventError) {
+        console.error("[onboarding] event insert error:", eventError);
+        setError(`Event error: ${eventError.message} (code: ${eventError.code})`);
+        setLoading(false);
+        return;
+      }
+
+      console.log("[onboarding] event created, marking onboarding complete...");
+      const { error: hostUpdateError } = await supabase
+        .from("hosts")
+        .update({ onboarding_complete: true })
+        .eq("id", user.id);
+
+      if (hostUpdateError) {
+        console.error("[onboarding] host update error:", hostUpdateError);
+      }
+
+      console.log("[onboarding] done, redirecting to dashboard");
+      router.push("/dashboard");
+    } catch (err) {
+      console.error("[onboarding] unexpected error:", err);
+      setError("Something went wrong. Please try again.");
       setLoading(false);
-      return;
     }
-
-    const priceFilsRaw = Math.round(parseFloat(event.priceAed || "0") * 100);
-    const priceFils = isNaN(priceFilsRaw) ? 0 : priceFilsRaw;
-
-    // Insert community
-    const { data: newCommunity, error: communityError } = await supabase
-      .from("communities")
-      .insert({
-        host_id: user.id,
-        name: community.name,
-        slug: community.slug,
-        type: community.type,
-        location: community.location,
-        description: community.description || null,
-        instagram_handle: community.instagram_handle || null,
-      })
-      .select("id")
-      .single();
-
-    if (communityError) {
-      setError(
-        communityError.message.includes("unique")
-          ? `The URL "${community.slug}" is already taken. Edit it above.`
-          : communityError.message
-      );
-      setLoading(false);
-      setStep(1);
-      return;
-    }
-
-    // Insert first event
-    const { error: eventError } = await supabase.from("events").insert({
-      community_id: newCommunity.id,
-      name: event.name,
-      slug: generateSlug(event.name),
-      location: event.location,
-      event_date: event.date,
-      event_time: event.time,
-      price: priceFils,
-      currency: "AED",
-      capacity: parseInt(event.capacity, 10),
-      is_recurring: event.repeat !== "one-off",
-      recurrence_rule: event.repeat === "one-off" ? null : event.repeat,
-      status: "active",
-    });
-
-    if (eventError) {
-      setError(eventError.message);
-      setLoading(false);
-      return;
-    }
-
-    // Mark onboarding complete
-    await supabase
-      .from("hosts")
-      .update({ onboarding_complete: true })
-      .eq("id", user.id);
-
-    router.push("/dashboard");
   }
 
   const priceNum = parseFloat(event.priceAed || "0");
