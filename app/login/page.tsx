@@ -5,6 +5,8 @@ import { createClient } from "@/lib/supabase/client";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [usePassword, setUsePassword] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -15,10 +17,22 @@ export default function LoginPage() {
     setError("");
 
     const supabase = createClient();
+
+    if (usePassword) {
+      const { error: authError } = await supabase.auth.signInWithPassword({ email, password });
+      if (authError) {
+        setError(authError.message);
+        setLoading(false);
+        return;
+      }
+      window.location.href = "/dashboard";
+      return;
+    }
+
     const { error: authError } = await supabase.auth.signInWithOtp({
       email,
       options: {
-        emailRedirectTo: 'https://commons-khaki.vercel.app/auth/callback',
+        emailRedirectTo: "https://commons-khaki.vercel.app/auth/callback",
       },
     });
 
@@ -70,6 +84,24 @@ export default function LoginPage() {
               />
             </div>
 
+            {usePassword && (
+              <div className="flex flex-col gap-1.5">
+                <label className="text-sm text-sand" htmlFor="password">
+                  Password
+                </label>
+                <input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  required
+                  autoComplete="current-password"
+                  className="w-full rounded-lg border border-sand/30 bg-white/5 px-4 py-2.5 text-sm text-cream placeholder:text-muted/50 focus:outline-none focus:border-sand transition-colors"
+                />
+              </div>
+            )}
+
             {error && (
               <p className="text-sm text-red-400">{error}</p>
             )}
@@ -79,7 +111,17 @@ export default function LoginPage() {
               disabled={loading}
               className="w-full bg-terracotta text-white rounded-lg px-5 py-3 text-sm font-medium hover:bg-terracotta/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? "Sending…" : "Send magic link"}
+              {loading
+                ? usePassword ? "Signing in…" : "Sending…"
+                : usePassword ? "Sign in" : "Send magic link"}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => { setUsePassword((v) => !v); setError(""); }}
+              className="text-xs text-muted hover:text-sand transition-colors text-center"
+            >
+              {usePassword ? "Use magic link instead" : "Use password instead"}
             </button>
           </form>
         )}
