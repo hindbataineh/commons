@@ -156,13 +156,13 @@ export default function OnboardingPage() {
       }
 
       console.log("[onboarding] event created, marking onboarding complete...");
-      const { error: hostUpdateError } = await supabase
-        .from("hosts")
-        .update({ onboarding_complete: true })
-        .eq("id", user.id);
-
-      if (hostUpdateError) {
-        console.error("[onboarding] host update error:", hostUpdateError);
+      const completeRes = await fetch("/api/complete-onboarding", { method: "POST" });
+      if (!completeRes.ok) {
+        const json = await completeRes.json();
+        console.error("[onboarding] complete-onboarding error:", json);
+        setError("Failed to complete onboarding. Please try again.");
+        setLoading(false);
+        return;
       }
 
       console.log("[onboarding] done, redirecting to dashboard");
