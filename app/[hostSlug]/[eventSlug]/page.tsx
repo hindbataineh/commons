@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/server";
 import { formatDate, formatPrice, formatTime } from "@/lib/utils";
 import BookingForm from "./BookingForm";
 
@@ -28,7 +29,8 @@ export default async function EventPage({ params }: Props) {
 
   if (!event || event.status !== "active") notFound();
 
-  const { count: bookedCount } = await supabase
+  const svc = createServiceClient();
+  const { count: bookedCount } = await svc
     .from("bookings")
     .select("*", { count: "exact", head: true })
     .eq("event_id", event.id)
@@ -89,19 +91,21 @@ export default async function EventPage({ params }: Props) {
           </p>
         )}
 
-        {/* Capacity bar */}
-        <div className="mb-8">
-          <div className="flex justify-between text-xs text-muted mb-2">
-            <span>{confirmedCount} going</span>
-            <span>{isFull ? "Full" : `${spotsLeft} spot${spotsLeft === 1 ? "" : "s"} left`}</span>
+        {/* Capacity bar — only shown when ≥70% full or sold out */}
+        {(fillPercent >= 70 || isFull) && (
+          <div className="mb-8">
+            <div className="flex justify-between text-xs text-muted mb-2">
+              <span>{confirmedCount} going</span>
+              <span>{isFull ? "Full" : `${spotsLeft} spot${spotsLeft === 1 ? "" : "s"} left`}</span>
+            </div>
+            <div className="h-1.5 bg-sand rounded-full overflow-hidden">
+              <div
+                className="h-full bg-terracotta rounded-full transition-all"
+                style={{ width: `${fillPercent}%` }}
+              />
+            </div>
           </div>
-          <div className="h-1.5 bg-sand rounded-full overflow-hidden">
-            <div
-              className="h-full bg-terracotta rounded-full transition-all"
-              style={{ width: `${fillPercent}%` }}
-            />
-          </div>
-        </div>
+        )}
 
         {/* Booking form */}
         <div className="border-t border-sand pt-8">

@@ -1,5 +1,4 @@
 import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
@@ -10,10 +9,9 @@ export async function GET(request: NextRequest) {
   const code = requestUrl.searchParams.get("code");
 
   if (code) {
-    const cookieStore = await cookies();
-
-    // Buffer cookies so we can attach them to the redirect response
-    const cookieBuffer: Array<{ name: string; value: string; options: Record<string, unknown> }> = [];
+    // Create a placeholder response — cookies will be written directly onto
+    // whichever final redirect response we return
+    const placeholderRes = NextResponse.redirect(new URL("/onboarding", requestUrl.origin));
 
     const supabase = createServerClient<Database>(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -21,12 +19,11 @@ export async function GET(request: NextRequest) {
       {
         cookies: {
           getAll() {
-            return cookieStore.getAll();
+            return request.cookies.getAll();
           },
           setAll(cookiesToSet) {
             cookiesToSet.forEach(({ name, value, options }) => {
-              cookieStore.set(name, value, options);
-              cookieBuffer.push({ name, value, options });
+              placeholderRes.cookies.set(name, value, options);
             });
           },
         },
@@ -36,6 +33,10 @@ export async function GET(request: NextRequest) {
     const { data: { session } } = await supabase.auth.exchangeCodeForSession(code);
 
     if (session) {
+      // Collect all cookies set during exchange so we can copy them to the
+      // final redirect response
+      const sessionCookies = placeholderRes.cookies.getAll();
+
       const svc = createServiceClient();
 
       const { data: host } = await svc
@@ -55,13 +56,13 @@ export async function GET(request: NextRequest) {
           console.error("Host row creation failed:", insertError);
         }
         const res = NextResponse.redirect(new URL("/onboarding", requestUrl.origin));
-        cookieBuffer.forEach(({ name, value, options }) => res.cookies.set(name, value, options));
+        sessionCookies.forEach(({ name, value, ...options }) => res.cookies.set(name, value, options));
         return res;
       }
 
       const destination = host.onboarding_complete ? "/dashboard" : "/onboarding";
       const res = NextResponse.redirect(new URL(destination, requestUrl.origin));
-      cookieBuffer.forEach(({ name, value, options }) => res.cookies.set(name, value, options));
+      sessionCookies.forEach(({ name, value, ...options }) => res.cookies.set(name, value, options));
       return res;
     }
   }
