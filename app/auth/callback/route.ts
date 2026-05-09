@@ -1,21 +1,19 @@
-import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import { createServiceClient } from "@/lib/supabase/server";
 import type { Database } from "@/types/database";
-import type { ResponseCookie } from "next/dist/compiled/@edge-runtime/cookies";
-
-const BASE_URL = "https://commons-khaki.vercel.app";
 
 export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url);
-  const code = searchParams.get("code");
+  const requestUrl = new URL(request.url);
+  const code = requestUrl.searchParams.get("code");
 
-  if (!code) {
-    return NextResponse.redirect(`${BASE_URL}/login?error=auth_failed`);
-  }
+  if (code) {
+    const cookieStore = await cookies();
 
-  try {
     // Buffer cookies so we can attach them to the redirect response
-    const cookieBuffer: Array<{ name: string; value: string; options: Partial<ResponseCookie> }> = [];
+    const cookieBuffer: Array<{ name: string; value: string; options: Record<string, unknown> }> = [];
 
     const supabase = createServerClient<Database>(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -23,55 +21,50 @@ export async function GET(request: NextRequest) {
       {
         cookies: {
           getAll() {
-            return request.cookies.getAll();
+            return cookieStore.getAll();
           },
           setAll(cookiesToSet) {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              cookieBuffer.push({ name, value, options })
-            );
+            cookiesToSet.forEach(({ name, value, options }) => {
+              cookieStore.set(name, value, options);
+              cookieBuffer.push({ name, value, options });
+            });
           },
         },
       }
     );
 
-    const { data: sessionData, error: sessionError } =
-      await supabase.auth.exchangeCodeForSession(code);
+    const { data: { session } } = await supabase.auth.exchangeCodeForSession(code);
 
-    if (sessionError || !sessionData.user) {
-      console.error("Code exchange failed:", sessionError);
-      return NextResponse.redirect(`${BASE_URL}/login?error=auth_failed`);
-    }
+    if (session) {
+      const svc = createServiceClient();
 
-    const userId = sessionData.user.id;
-    const userEmail = sessionData.user.email ?? "";
+      const { data: host } = await svc
+        .from("hosts")
+        .select("id, onboarding_complete")
+        .eq("id", session.user.id)
+        .maybeSingle();
 
-    const { data: host } = await supabase
-      .from("hosts")
-      .select("id, onboarding_complete")
-      .eq("id", userId)
-      .maybeSingle();
-
-    if (!host) {
-      const { error: insertError } = await supabase.from("hosts").insert({
-        id: userId,
-        email: userEmail,
-        name: userEmail.split("@")[0],
-        onboarding_complete: false,
-      });
-      if (insertError) {
-        console.error("Host row creation failed:", insertError);
+      if (!host) {
+        const { error: insertError } = await svc.from("hosts").insert({
+          id: session.user.id,
+          email: session.user.email ?? "",
+          name: session.user.email?.split("@")[0] ?? "Host",
+          onboarding_complete: false,
+        });
+        if (insertError) {
+          console.error("Host row creation failed:", insertError);
+        }
+        const res = NextResponse.redirect(new URL("/onboarding", requestUrl.origin));
+        cookieBuffer.forEach(({ name, value, options }) => res.cookies.set(name, value, options));
+        return res;
       }
-      const res = NextResponse.redirect(`${BASE_URL}/onboarding`);
+
+      const destination = host.onboarding_complete ? "/dashboard" : "/onboarding";
+      const res = NextResponse.redirect(new URL(destination, requestUrl.origin));
       cookieBuffer.forEach(({ name, value, options }) => res.cookies.set(name, value, options));
       return res;
     }
-
-    const destination = host.onboarding_complete ? `${BASE_URL}/dashboard` : `${BASE_URL}/onboarding`;
-    const res = NextResponse.redirect(destination);
-    cookieBuffer.forEach(({ name, value, options }) => res.cookies.set(name, value, options));
-    return res;
-  } catch (err) {
-    console.error("Auth callback error:", err);
-    return NextResponse.redirect(`${BASE_URL}/login?error=auth_failed`);
   }
+
+  return NextResponse.redirect(new URL("/login?error=auth_failed", requestUrl.origin));
 }
