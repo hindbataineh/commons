@@ -1,71 +1,59 @@
 import { createServerClient } from "@supabase/ssr";
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
-import type { Database } from "@/types/database";
 
 export async function GET(request: NextRequest) {
-  const requestUrl = new URL(request.url);
-  const code = requestUrl.searchParams.get("code");
+  const { searchParams, origin } = new URL(request.url);
+  const code = searchParams.get("code");
 
-  if (code) {
-    // Create a placeholder response — cookies will be written directly onto
-    // whichever final redirect response we return
-    const placeholderRes = NextResponse.redirect(new URL("/onboarding", requestUrl.origin));
-
-    const supabase = createServerClient<Database>(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          getAll() {
-            return request.cookies.getAll();
-          },
-          setAll(cookiesToSet) {
-            cookiesToSet.forEach(({ name, value, options }) => {
-              placeholderRes.cookies.set(name, value, options);
-            });
-          },
-        },
-      }
-    );
-
-    const { data: { session } } = await supabase.auth.exchangeCodeForSession(code);
-
-    if (session) {
-      // Collect all cookies set during exchange so we can copy them to the
-      // final redirect response
-      const sessionCookies = placeholderRes.cookies.getAll();
-
-      const svc = createServiceClient();
-
-      const { data: host } = await svc
-        .from("hosts")
-        .select("id, onboarding_complete")
-        .eq("id", session.user.id)
-        .maybeSingle();
-
-      if (!host) {
-        const { error: insertError } = await svc.from("hosts").insert({
-          id: session.user.id,
-          email: session.user.email ?? "",
-          name: session.user.email?.split("@")[0] ?? "Host",
-          onboarding_complete: false,
-        });
-        if (insertError) {
-          console.error("Host row creation failed:", insertError);
-        }
-        const res = NextResponse.redirect(new URL("/onboarding", requestUrl.origin));
-        sessionCookies.forEach(({ name, value, ...options }) => res.cookies.set(name, value, options));
-        return res;
-      }
-
-      const destination = host.onboarding_complete ? "/dashboard" : "/onboarding";
-      const res = NextResponse.redirect(new URL(destination, requestUrl.origin));
-      sessionCookies.forEach(({ name, value, ...options }) => res.cookies.set(name, value, options));
-      return res;
-    }
+  if (!code) {
+    return NextResponse.redirect(`${origin}/login?error=no_code`);
   }
 
-  return NextResponse.redirect(new URL("/login?error=auth_failed", requestUrl.origin));
+  const response = NextResponse.redirect(`${origin}/onboarding`);
+
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value, options }) =>
+            response.cookies.set(name, value, options)
+          );
+        },
+      },
+    }
+  );
+
+  const { data: { session }, error } = await supabase.auth.exchangeCodeForSession(code);
+
+  if (error || !session) {
+    console.error("Auth callback error:", error);
+    return NextResponse.redirect(`${origin}/login?error=auth_failed`);
+  }
+
+  const svc = createServiceClient();
+  const { data: host } = await svc
+    .from("hosts")
+    .select("id, onboarding_complete")
+    .eq("id", session.user.id)
+    .maybeSingle();
+
+  if (!host) {
+    await svc.from("hosts").insert({
+      id: session.user.id,
+      email: session.user.email!,
+      name: session.user.email!.split("@")[0],
+    });
+    response.headers.set("location", `${origin}/onboarding`);
+    return response;
+  }
+
+  const destination = host.onboarding_complete ? "/dashboard" : "/onboarding";
+  response.headers.set("location", `${origin}${destination}`);
+  return response;
 }
