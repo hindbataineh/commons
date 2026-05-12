@@ -2,18 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
 
 type RepeatOption = "one-off" | "weekly" | "biweekly";
 
-function generateSlug(name: string): string {
-  return name
-    .toLowerCase()
-    .replace(/[^\w\s-]/g, "")
-    .trim()
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-");
-}
 
 const baseInput =
   "w-full rounded-lg border border-sand bg-white px-4 py-2.5 text-sm text-charcoal placeholder:text-muted/50 focus:outline-none focus:border-charcoal focus:ring-1 focus:ring-charcoal/20 transition-colors";
@@ -50,54 +41,36 @@ export default function NewEventPage() {
     setLoading(true);
     setError("");
 
-    const supabase = createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    try {
+      const res = await fetch("/api/create-event", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: form.name,
+          date: form.date,
+          time: form.time,
+          location: form.location,
+          priceAed: form.priceAed,
+          capacity: form.capacity,
+          repeat: form.repeat,
+        }),
+      });
 
-    if (!user) {
-      setError("Not logged in.");
+      const json = await res.json();
+
+      if (!res.ok) {
+        console.error("create-event error:", json);
+        setError(json.error || "Failed to create event. Please try again.");
+        setLoading(false);
+        return;
+      }
+
+      router.push("/dashboard/events");
+    } catch (err) {
+      console.error("create-event unexpected error:", err);
+      setError("Something went wrong. Please try again.");
       setLoading(false);
-      return;
     }
-
-    // Get community
-    const { data: community } = await supabase
-      .from("communities")
-      .select("id")
-      .eq("host_id", user.id)
-      .single();
-
-    if (!community) {
-      setError("Community not found.");
-      setLoading(false);
-      return;
-    }
-
-    const priceFils = Math.round(Math.max(0, priceNum) * 100);
-
-    const { error: insertError } = await supabase.from("events").insert({
-      community_id: community.id,
-      name: form.name,
-      slug: generateSlug(form.name),
-      location: form.location,
-      event_date: form.date,
-      event_time: form.time,
-      price: priceFils,
-      currency: "AED",
-      capacity: parseInt(form.capacity, 10) || 20,
-      is_recurring: form.repeat !== "one-off",
-      recurrence_rule: form.repeat === "one-off" ? null : form.repeat,
-      status: "active",
-    });
-
-    if (insertError) {
-      setError(insertError.message);
-      setLoading(false);
-      return;
-    }
-
-    router.push("/dashboard/events");
   }
 
   return (
