@@ -24,11 +24,18 @@ export default function BookingForm({ eventId, hostSlug, eventSlug, isFree, isFu
     setError("");
 
     const form = e.currentTarget;
+    const whatsapp = (form.elements.namedItem("member_whatsapp") as HTMLInputElement).value.trim();
+    if (!whatsapp) {
+      setError("Please enter your WhatsApp number");
+      setLoading(false);
+      return;
+    }
+
     const data = {
       event_id: eventId,
       member_name: (form.elements.namedItem("member_name") as HTMLInputElement).value,
       member_email: (form.elements.namedItem("member_email") as HTMLInputElement).value,
-      member_whatsapp: (form.elements.namedItem("member_whatsapp") as HTMLInputElement).value || null,
+      member_whatsapp: whatsapp,
     };
 
     try {
@@ -78,9 +85,9 @@ export default function BookingForm({ eventId, hostSlug, eventSlug, isFree, isFu
       <Input
         name="member_whatsapp"
         type="tel"
-        label="WhatsApp number"
+        label="WhatsApp number *"
         placeholder="+971 50 123 4567"
-        hint="Optional — for event updates"
+        required
         autoComplete="tel"
       />
 

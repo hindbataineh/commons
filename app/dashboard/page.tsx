@@ -15,7 +15,6 @@ export default async function DashboardPage() {
   if (!data) redirect("/onboarding");
 
   const { community, stats, quietMembersCount, nextEvents, recentMembers } = data;
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "";
 
   return (
     <div className="p-8 max-w-5xl">
@@ -117,8 +116,7 @@ export default async function DashboardPage() {
         <div>
           <h2 className="text-sm font-medium text-charcoal uppercase tracking-wide mb-4">Booking link</h2>
           <BookingLinkPanel
-            slug={community.slug}
-            baseUrl={baseUrl}
+            path={`/${community.slug}`}
             bookingsThisMonth={stats.bookingsThisMonth}
           />
         </div>
@@ -177,26 +175,4 @@ function StatCard({ label, value }: { label: string; value: string }) {
   );
 }
 
-function BookingLinkPanel({
-  slug,
-  baseUrl,
-  bookingsThisMonth,
-}: {
-  slug: string;
-  baseUrl: string;
-  bookingsThisMonth: number;
-}) {
-  const url = `${baseUrl}/${slug}`;
-  return (
-    <div className="bg-white border border-sand rounded-xl px-5 py-5">
-      <p className="text-xs font-mono text-charcoal break-all mb-3">{url}</p>
-      <p className="text-xs text-muted mb-4">
-        <strong className="text-charcoal">{bookingsThisMonth}</strong> booking{bookingsThisMonth !== 1 ? "s" : ""} this month
-      </p>
-      <CopyButton url={url} />
-    </div>
-  );
-}
-
-// Thin client wrapper just for the copy action
-import CopyButton from "./CopyButton";
+import BookingLinkPanel from "./BookingLinkPanel";

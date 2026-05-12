@@ -3,6 +3,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { getCommunityForHost, getAllEventsWithStats } from "@/lib/queries";
 import { formatPrice, formatShortDate, formatTime } from "@/lib/utils";
+import CopyButton from "../CopyButton";
 
 export default async function EventsPage() {
   const supabase = await createClient();
@@ -120,12 +121,18 @@ function EventTable({
                   <StatusBadge status={event.status} isPast={event.isPast} />
                 </td>
                 <td className="px-4 py-4">
-                  <Link
-                    href={`/dashboard/events/${event.id}`}
-                    className="text-xs text-muted hover:text-terracotta transition-colors"
-                  >
-                    View →
-                  </Link>
+                  <div className="flex items-center gap-3">
+                    <Link
+                      href={`/dashboard/events/${event.id}`}
+                      className="text-xs text-muted hover:text-terracotta transition-colors"
+                    >
+                      View →
+                    </Link>
+                    <CopyButton
+                      path={`/${communitySlug}/${event.slug}`}
+                      className="text-xs text-muted hover:text-terracotta transition-colors"
+                    />
+                  </div>
                 </td>
               </tr>
             );
