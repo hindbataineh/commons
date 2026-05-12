@@ -12,6 +12,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
+    const whatsappDigits = String(member_whatsapp).replace(/\D/g, "");
+    if (whatsappDigits.length < 7) {
+      return NextResponse.json({ error: "Invalid WhatsApp number" }, { status: 400 });
+    }
+
     const supabase = createServiceClient();
 
     const { data: event, error: eventError } = await supabase

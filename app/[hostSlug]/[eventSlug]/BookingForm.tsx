@@ -31,6 +31,52 @@ const COUNTRY_CODES = [
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+function validatePhone(code: string, digits: string): string | null {
+  switch (code) {
+    case "+971":
+    case "+966":
+      if (digits.length !== 9 || !digits.startsWith("5"))
+        return `${code === "+971" ? "UAE" : "Saudi Arabia"} numbers must be 9 digits starting with 5 (e.g. 50 123 4567)`;
+      break;
+    case "+974":
+      if (digits.length !== 8)
+        return "Qatar numbers must be 8 digits";
+      break;
+    case "+965":
+      if (digits.length !== 8 || !/^[4569]/.test(digits))
+        return "Kuwait numbers must be 8 digits starting with 4, 5, 6, or 9";
+      break;
+    case "+973":
+      if (digits.length !== 8)
+        return "Bahrain numbers must be 8 digits";
+      break;
+    case "+968":
+      if (digits.length !== 8)
+        return "Oman numbers must be 8 digits";
+      break;
+    case "+44":
+      if (digits.length !== 10)
+        return "UK numbers must be 10 digits (e.g. 7700 123456)";
+      break;
+    case "+1":
+      if (digits.length !== 10)
+        return "US numbers must be 10 digits";
+      break;
+    case "+91":
+      if (digits.length !== 10)
+        return "India numbers must be 10 digits";
+      break;
+    case "+92":
+      if (digits.length !== 10)
+        return "Pakistan numbers must be 10 digits";
+      break;
+    default:
+      if (digits.length < 7 || digits.length > 12)
+        return "Please enter a valid phone number (7–12 digits)";
+  }
+  return null;
+}
+
 export default function BookingForm({ eventId, hostSlug, eventSlug, isFree, isFull }: Props) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -44,9 +90,7 @@ export default function BookingForm({ eventId, hostSlug, eventSlug, isFree, isFu
 
     const form = e.currentTarget;
     const email = (form.elements.namedItem("member_email") as HTMLInputElement).value.trim();
-    const rawNumber = (form.elements.namedItem("member_whatsapp_number") as HTMLInputElement).value
-      .trim()
-      .replace(/\s+/g, "");
+    const rawNumber = (form.elements.namedItem("member_whatsapp_number") as HTMLInputElement).value;
 
     // Email validation
     if (!EMAIL_RE.test(email)) {
@@ -55,21 +99,17 @@ export default function BookingForm({ eventId, hostSlug, eventSlug, isFree, isFu
       return;
     }
 
-    // Phone validation
-    const digitsOnly = rawNumber.replace(/\D/g, "");
-    if (digitsOnly.length < 7) {
-      setError("Please enter a valid phone number");
-      setLoading(false);
-      return;
-    }
-    if (!/^\d+$/.test(digitsOnly)) {
-      setError("Please enter a valid phone number");
+    // Strip spaces, dashes, parentheses — then leading zeros
+    const digitsOnly = rawNumber.replace(/[\s\-()]/g, "").replace(/\D/g, "");
+    const normalised = digitsOnly.replace(/^0+/, "");
+
+    const phoneError = validatePhone(countryCode, normalised);
+    if (phoneError) {
+      setError(phoneError);
       setLoading(false);
       return;
     }
 
-    // Strip leading zero before combining with country code
-    const normalised = digitsOnly.replace(/^0+/, "");
     const member_whatsapp = `${countryCode}${normalised}`;
 
     const data = {
