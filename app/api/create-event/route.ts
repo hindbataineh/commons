@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
 
     const { data: community } = await svc
       .from("communities")
-      .select("id")
+      .select("id, slug")
       .eq("host_id", user.id)
       .single();
 
@@ -79,7 +79,12 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    return NextResponse.json({ success: true, eventId: newEvent.id });
+    return NextResponse.json({
+      success: true,
+      eventId: newEvent.id,
+      eventSlug: slug,
+      communitySlug: community.slug,
+    });
   } catch (err) {
     console.error("create-event route error:", err);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
