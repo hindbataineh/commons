@@ -52,7 +52,7 @@ export default async function CommunityPage({ params }: Props) {
       .from("bookings")
       .select("event_id")
       .in("event_id", eventIds)
-      .in("status", ["confirmed", "waitlisted"]);
+      .in("status", ["confirmed"]);
 
     if (bookingRows) {
       bookedCounts = bookingRows.reduce<Record<string, number>>((acc, row) => {

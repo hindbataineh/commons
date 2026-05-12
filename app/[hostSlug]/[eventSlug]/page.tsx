@@ -34,7 +34,7 @@ export default async function EventPage({ params }: Props) {
     .from("bookings")
     .select("*", { count: "exact", head: true })
     .eq("event_id", event.id)
-    .in("status", ["confirmed", "waitlisted"]);
+    .in("status", ["confirmed", "pending"]);
 
   const confirmedCount = bookedCount ?? 0;
   const spotsLeft = event.capacity - confirmedCount;

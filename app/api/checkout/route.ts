@@ -98,6 +98,22 @@ export async function POST(req: NextRequest) {
       cancel_url: `${origin}/${community.slug}/${event.slug}`,
     });
 
+    // Insert a pending booking immediately so the spot is reserved while
+    // the user completes payment. The webhook will promote it to confirmed.
+    const { error: bookingError } = await supabase.from("bookings").insert({
+      event_id,
+      member_name,
+      member_email,
+      member_whatsapp: member_whatsapp || null,
+      status: "pending",
+      payment_status: "pending",
+      amount_paid: 0,
+    });
+
+    if (bookingError && bookingError.code !== "23505") {
+      console.error("Pending booking insert error:", bookingError);
+    }
+
     return NextResponse.json({ url: session.url });
   } catch (err) {
     if (typeof err === "object" && err !== null && "code" in err && (err as { code: string }).code === "23505") {
