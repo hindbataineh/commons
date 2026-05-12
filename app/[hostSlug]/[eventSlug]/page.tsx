@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { formatDate, formatPrice, formatTime } from "@/lib/utils";
@@ -44,10 +45,10 @@ export default async function EventPage({ params }: Props) {
   return (
     <main className="min-h-screen bg-off-white px-4 py-10 md:py-16">
       <div className="max-w-lg mx-auto">
-        {/* Community name */}
-        <p className="text-sm text-muted mb-6 tracking-wide uppercase">
+        {/* Community name — links back to community page */}
+        <Link href={`/${hostSlug}`} className="text-sm text-muted mb-6 tracking-wide uppercase hover:text-charcoal transition-colors inline-block">
           {community.name}
-        </p>
+        </Link>
 
         {/* Event name */}
         <h1 className="font-display text-4xl md:text-5xl font-medium leading-tight text-charcoal mb-6">

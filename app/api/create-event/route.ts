@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { name, date, time, location, priceAed, capacity, repeat } = body;
+    const { name, date, time, location, description, priceAed, capacity, repeat } = body;
 
     if (!name || !date || !time || !location) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -59,6 +59,7 @@ export async function POST(req: NextRequest) {
         name,
         slug,
         location,
+        description: description || null,
         event_date: date,
         event_time: time,
         price: priceFils,

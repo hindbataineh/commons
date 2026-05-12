@@ -21,7 +21,7 @@ export async function sendBookingConfirmation({
   return resend.emails.send({
     from: "Commons <no-reply@usecommons.co>",
     to,
-    subject: `You're in — ${eventName}`,
+    subject: `You're booked — ${eventName}`,
     html: `
       <div style="font-family: sans-serif; max-width: 520px; margin: 0 auto; padding: 32px 24px; background: #FDFCFA; color: #1A1714;">
         <p style="font-size: 13px; color: #7A7569; margin: 0 0 24px;">${communityName}</p>

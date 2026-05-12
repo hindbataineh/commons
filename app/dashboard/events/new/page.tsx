@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 
-type RepeatOption = "one-off" | "weekly" | "biweekly";
+type RepeatOption = "one-off" | "weekly" | "biweekly" | "monthly";
 
 interface SuccessData {
   eventName: string;
@@ -26,6 +26,7 @@ export default function NewEventPage() {
     date: "",
     time: "",
     location: "",
+    description: "",
     priceAed: "0",
     capacity: "20",
     repeat: "one-off" as RepeatOption,
@@ -56,6 +57,7 @@ export default function NewEventPage() {
           date: form.date,
           time: form.time,
           location: form.location,
+          description: form.description,
           priceAed: form.priceAed,
           capacity: form.capacity,
           repeat: form.repeat,
@@ -244,7 +246,22 @@ export default function NewEventPage() {
             <option value="one-off">One-off</option>
             <option value="weekly">Weekly</option>
             <option value="biweekly">Every two weeks</option>
+            <option value="monthly">Every month</option>
           </select>
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+          <label className={baseLabel}>
+            Description <span className="text-muted font-normal">(optional)</span>
+          </label>
+          <textarea
+            className={`${baseInput} resize-none`}
+            rows={3}
+            maxLength={500}
+            placeholder="What should members know? Level, what to bring, meeting point details..."
+            value={form.description}
+            onChange={(e) => set("description", e.target.value)}
+          />
         </div>
 
         <div className="flex gap-3 pt-2">

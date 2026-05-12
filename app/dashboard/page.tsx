@@ -81,7 +81,7 @@ export default async function DashboardPage() {
               {nextEvents.map((event) => {
                 const fillPct = Math.min(100, Math.round((event.confirmedCount / event.capacity) * 100));
                 return (
-                  <div key={event.id} className="bg-white border border-sand rounded-xl px-5 py-4">
+                  <Link key={event.id} href={`/dashboard/events/${event.id}`} className="block bg-white border border-sand rounded-xl px-5 py-4 hover:border-charcoal/30 transition-colors">
                     <div className="flex items-start justify-between gap-2 mb-2">
                       <div>
                         <p className="font-medium text-charcoal text-sm">{event.name}</p>
@@ -105,7 +105,7 @@ export default async function DashboardPage() {
                     <div className="h-1 bg-sand rounded-full overflow-hidden">
                       <div className="h-full bg-terracotta rounded-full" style={{ width: `${fillPct}%` }} />
                     </div>
-                  </div>
+                  </Link>
                 );
               })}
             </div>

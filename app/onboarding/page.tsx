@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
 type Step = 1 | 2 | 3;
-type RepeatOption = "one-off" | "weekly" | "biweekly";
+type RepeatOption = "one-off" | "weekly" | "biweekly" | "monthly";
 
 interface CommunityForm {
   name: string;
@@ -21,6 +21,7 @@ interface EventForm {
   date: string;
   time: string;
   location: string;
+  description: string;
   priceAed: string;
   capacity: string;
   repeat: RepeatOption;
@@ -69,6 +70,7 @@ export default function OnboardingPage() {
     date: "",
     time: "",
     location: "",
+    description: "",
     priceAed: "0",
     capacity: "20",
     repeat: "one-off",
@@ -138,6 +140,7 @@ export default function OnboardingPage() {
         name: event.name,
         slug: generateSlug(event.name),
         location: event.location || community.location,
+        description: event.description || null,
         event_date: event.date,
         event_time: event.time,
         price: priceFils,
@@ -407,7 +410,22 @@ export default function OnboardingPage() {
                 <option value="one-off">One-off</option>
                 <option value="weekly">Weekly</option>
                 <option value="biweekly">Every two weeks</option>
+                <option value="monthly">Every month</option>
               </select>
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label className={baseLabel}>
+                Description <span className="text-muted font-normal">(optional)</span>
+              </label>
+              <textarea
+                className={`${baseInput} resize-none`}
+                rows={3}
+                maxLength={500}
+                placeholder="What should members know? Level, what to bring, meeting point details..."
+                value={event.description}
+                onChange={(e) => setEvent((p) => ({ ...p, description: e.target.value }))}
+              />
             </div>
 
             <div className="flex gap-3 mt-2">
