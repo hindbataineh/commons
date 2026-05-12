@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { formatDate, formatPrice, formatTime } from "@/lib/utils";
 
 interface Props {
@@ -47,7 +47,8 @@ export default async function CommunityPage({ params }: Props) {
   let bookedCounts: Record<string, number> = {};
 
   if (eventIds.length > 0) {
-    const { data: bookingRows } = await supabase
+    const svc = createServiceClient();
+    const { data: bookingRows } = await svc
       .from("bookings")
       .select("event_id")
       .in("event_id", eventIds)

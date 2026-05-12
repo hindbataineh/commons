@@ -119,6 +119,11 @@ export default async function EventPage({ params }: Props) {
             isFree={event.price === 0}
             isFull={isFull}
           />
+          {isFull && event.price > 0 && (
+            <p className="text-xs text-center text-muted mt-3">
+              You won&rsquo;t be charged now. If a spot opens, we&rsquo;ll notify you by email before any payment is taken.
+            </p>
+          )}
         </div>
       </div>
     </main>

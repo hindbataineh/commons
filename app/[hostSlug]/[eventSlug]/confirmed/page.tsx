@@ -5,12 +5,13 @@ import { formatDate, formatTime } from "@/lib/utils";
 
 interface Props {
   params: Promise<{ hostSlug: string; eventSlug: string }>;
-  searchParams: Promise<{ name?: string }>;
+  searchParams: Promise<{ name?: string; status?: string }>;
 }
 
 export default async function ConfirmedPage({ params, searchParams }: Props) {
   const { hostSlug, eventSlug } = await params;
-  const { name } = await searchParams;
+  const { name, status } = await searchParams;
+  const isWaitlisted = status === "waitlisted";
 
   const supabase = await createClient();
 
@@ -34,17 +35,17 @@ export default async function ConfirmedPage({ params, searchParams }: Props) {
   return (
     <main className="min-h-screen bg-off-white flex items-center justify-center px-4 py-16">
       <div className="max-w-md w-full mx-auto text-center">
-        {/* Checkmark */}
+        {/* Icon */}
         <div className="w-16 h-16 rounded-full bg-charcoal flex items-center justify-center mx-auto mb-8">
-          <svg
-            className="w-8 h-8 text-white"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={2}
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-          </svg>
+          {isWaitlisted ? (
+            <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6l4 2m6-2a10 10 0 11-20 0 10 10 0 0120 0z" />
+            </svg>
+          ) : (
+            <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+          )}
         </div>
 
         {/* Heading */}
@@ -52,11 +53,13 @@ export default async function ConfirmedPage({ params, searchParams }: Props) {
           {community.name}
         </p>
         <h1 className="font-display text-5xl font-medium text-charcoal mb-2">
-          You&rsquo;re in.
+          {isWaitlisted ? "You’re on the waitlist." : "You’re in."}
         </h1>
-        {name && (
-          <p className="text-muted mb-10">See you there, {name}.</p>
-        )}
+        <p className="text-muted mb-10">
+          {isWaitlisted
+            ? "We’ll notify you by email if a spot opens up. You haven’t been charged anything."
+            : name ? `See you there, ${name}.` : "See you there."}
+        </p>
 
         {/* Event detail card */}
         <div className="bg-cream border border-sand rounded-xl p-6 text-left mb-8">
@@ -79,9 +82,11 @@ export default async function ConfirmedPage({ params, searchParams }: Props) {
         </div>
 
         {/* Reminder note */}
-        <p className="text-sm text-muted mb-8">
-          You&rsquo;ll receive a reminder email before the event.
-        </p>
+        {!isWaitlisted && (
+          <p className="text-sm text-muted mb-8">
+            You&rsquo;ll receive a reminder email before the event.
+          </p>
+        )}
 
         {/* Back link */}
         <Link

@@ -40,7 +40,8 @@ export default function BookingForm({ eventId, hostSlug, eventSlug, isFree, isFu
         });
         const json = await res.json();
         if (!res.ok) throw new Error(json.error || "Booking failed");
-        router.push(`/${hostSlug}/${eventSlug}/confirmed?name=${encodeURIComponent(data.member_name)}`);
+        const qs = new URLSearchParams({ name: data.member_name, status: json.status ?? "confirmed" });
+        router.push(`/${hostSlug}/${eventSlug}/confirmed?${qs}`);
       } else {
         const res = await fetch("/api/checkout", {
           method: "POST",
