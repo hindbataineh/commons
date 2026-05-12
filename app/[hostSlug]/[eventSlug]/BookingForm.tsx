@@ -13,10 +13,29 @@ interface Props {
   isFull: boolean;
 }
 
+const COUNTRY_CODES = [
+  { code: "+971", label: "+971 UAE" },
+  { code: "+966", label: "+966 Saudi Arabia" },
+  { code: "+974", label: "+974 Qatar" },
+  { code: "+965", label: "+965 Kuwait" },
+  { code: "+973", label: "+973 Bahrain" },
+  { code: "+968", label: "+968 Oman" },
+  { code: "+44",  label: "+44 UK" },
+  { code: "+1",   label: "+1 USA" },
+  { code: "+91",  label: "+91 India" },
+  { code: "+92",  label: "+92 Pakistan" },
+  { code: "+20",  label: "+20 Egypt" },
+  { code: "+962", label: "+962 Jordan" },
+  { code: "+961", label: "+961 Lebanon" },
+];
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 export default function BookingForm({ eventId, hostSlug, eventSlug, isFree, isFull }: Props) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [countryCode, setCountryCode] = useState("+971");
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -24,18 +43,40 @@ export default function BookingForm({ eventId, hostSlug, eventSlug, isFree, isFu
     setError("");
 
     const form = e.currentTarget;
-    const whatsapp = (form.elements.namedItem("member_whatsapp") as HTMLInputElement).value.trim();
-    if (!whatsapp) {
-      setError("Please enter your WhatsApp number");
+    const email = (form.elements.namedItem("member_email") as HTMLInputElement).value.trim();
+    const rawNumber = (form.elements.namedItem("member_whatsapp_number") as HTMLInputElement).value
+      .trim()
+      .replace(/\s+/g, "");
+
+    // Email validation
+    if (!EMAIL_RE.test(email)) {
+      setError("Please enter a valid email address");
       setLoading(false);
       return;
     }
 
+    // Phone validation
+    const digitsOnly = rawNumber.replace(/\D/g, "");
+    if (digitsOnly.length < 7) {
+      setError("Please enter a valid phone number");
+      setLoading(false);
+      return;
+    }
+    if (!/^\d+$/.test(digitsOnly)) {
+      setError("Please enter a valid phone number");
+      setLoading(false);
+      return;
+    }
+
+    // Strip leading zero before combining with country code
+    const normalised = digitsOnly.replace(/^0+/, "");
+    const member_whatsapp = `${countryCode}${normalised}`;
+
     const data = {
       event_id: eventId,
-      member_name: (form.elements.namedItem("member_name") as HTMLInputElement).value,
-      member_email: (form.elements.namedItem("member_email") as HTMLInputElement).value,
-      member_whatsapp: whatsapp,
+      member_name: (form.elements.namedItem("member_name") as HTMLInputElement).value.trim(),
+      member_email: email,
+      member_whatsapp,
     };
 
     try {
@@ -82,14 +123,33 @@ export default function BookingForm({ eventId, hostSlug, eventSlug, isFree, isFu
         required
         autoComplete="email"
       />
-      <Input
-        name="member_whatsapp"
-        type="tel"
-        label="WhatsApp number *"
-        placeholder="+971 50 123 4567"
-        required
-        autoComplete="tel"
-      />
+
+      {/* WhatsApp: country code + number */}
+      <div className="flex flex-col gap-1.5">
+        <label className="text-sm font-medium text-charcoal">
+          WhatsApp number<span className="text-terracotta ml-0.5">*</span>
+        </label>
+        <div className="flex gap-2">
+          <select
+            value={countryCode}
+            onChange={(e) => setCountryCode(e.target.value)}
+            className="rounded-lg border border-sand bg-white px-3 py-2.5 text-sm text-charcoal focus:outline-none focus:border-charcoal focus:ring-1 focus:ring-charcoal/20 transition-colors shrink-0"
+          >
+            {COUNTRY_CODES.map(({ code, label }) => (
+              <option key={code} value={code}>{label}</option>
+            ))}
+          </select>
+          <input
+            name="member_whatsapp_number"
+            type="tel"
+            inputMode="numeric"
+            placeholder="50 123 4567"
+            required
+            autoComplete="tel-national"
+            className="w-full rounded-lg border border-sand bg-white px-4 py-2.5 text-sm text-charcoal placeholder:text-muted/60 focus:outline-none focus:border-charcoal focus:ring-1 focus:ring-charcoal/20 transition-colors"
+          />
+        </div>
+      </div>
 
       {error && (
         error.toLowerCase().includes("already booked") ? (
