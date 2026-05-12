@@ -120,14 +120,12 @@ function EventTable({
                   <StatusBadge status={event.status} isPast={event.isPast} />
                 </td>
                 <td className="px-4 py-4">
-                  <a
-                    href={`/${communitySlug}/${event.slug}`}
-                    target="_blank"
-                    rel="noreferrer"
+                  <Link
+                    href={`/dashboard/events/${event.id}`}
                     className="text-xs text-muted hover:text-terracotta transition-colors"
                   >
-                    View ↗
-                  </a>
+                    View →
+                  </Link>
                 </td>
               </tr>
             );
