@@ -46,8 +46,8 @@ export default async function EventPage({ params }: Props) {
     <main className="min-h-screen bg-off-white px-4 py-10 md:py-16">
       <div className="max-w-lg mx-auto">
         {/* Community name — links back to community page */}
-        <Link href={`/${hostSlug}`} className="text-sm text-muted mb-6 tracking-wide uppercase hover:text-charcoal transition-colors inline-block">
-          {community.name}
+        <Link href={`/${hostSlug}`} className="text-sm text-muted mb-6 inline-flex items-center gap-1 hover:text-charcoal hover:underline transition-colors">
+          ← {community.name}
         </Link>
 
         {/* Event name */}

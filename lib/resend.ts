@@ -1,5 +1,6 @@
 import { Resend } from "resend";
 
+console.log("RESEND_API_KEY exists:", !!process.env.RESEND_API_KEY);
 export const resend = new Resend(process.env.RESEND_API_KEY!);
 
 export async function sendBookingConfirmation({
@@ -19,7 +20,7 @@ export async function sendBookingConfirmation({
   communityName: string;
 }) {
   return resend.emails.send({
-    from: "Commons <no-reply@usecommons.co>",
+    from: "Commons <onboarding@resend.dev>",
     to,
     subject: `You're booked — ${eventName}`,
     html: `

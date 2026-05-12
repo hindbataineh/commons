@@ -58,6 +58,7 @@ export default function EventDetailClient({
   const [promotingId, setPromotingId] = useState<string | null>(null);
   const [promoteErrors, setPromoteErrors] = useState<Record<string, string>>({});
   const [promotedIds, setPromotedIds] = useState<Set<string>>(new Set());
+  const [overCapacityConfirm, setOverCapacityConfirm] = useState<{ id: string; name: string } | null>(null);
 
   const [editForm, setEditForm] = useState({
     name: event.name,
@@ -109,17 +110,23 @@ export default function EventDetailClient({
     router.push("/dashboard/events");
   }
 
-  async function handlePromote(bookingId: string) {
+  async function handlePromote(bookingId: string, force = false) {
     setPromotingId(bookingId);
+    setOverCapacityConfirm(null);
     setPromoteErrors((p) => ({ ...p, [bookingId]: "" }));
     const res = await fetch("/api/promote-from-waitlist", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ bookingId }),
+      body: JSON.stringify({ bookingId, force }),
     });
     const json = await res.json();
     setPromotingId(null);
     if (!res.ok) {
+      if (json.code === "OVER_CAPACITY") {
+        const row = waitlisted.find((b) => b.id === bookingId);
+        setOverCapacityConfirm({ id: bookingId, name: row?.member_name ?? "this member" });
+        return;
+      }
       setPromoteErrors((p) => ({ ...p, [bookingId]: json.error || "Failed to promote" }));
       return;
     }
@@ -235,7 +242,14 @@ export default function EventDetailClient({
       {showCancelConfirm && (
         <div className="bg-red-50 border border-red-200 rounded-xl p-5 mb-8">
           <p className="text-sm font-medium text-red-800 mb-1">Cancel this event?</p>
-          <p className="text-xs text-red-700 mb-4">Members will not be notified automatically.</p>
+          <p className="text-xs text-red-700 mb-2">Members will not be notified automatically.</p>
+          {event.price > 0 && (
+            <p className="text-xs text-red-700 mb-4">
+              This event has paid bookings. You will need to refund members manually through your Stripe dashboard at{" "}
+              <span className="font-medium">dashboard.stripe.com</span>
+            </p>
+          )}
+          {event.price === 0 && <div className="mb-4" />}
           <div className="flex gap-3">
             <button onClick={() => setShowCancelConfirm(false)}
               className="flex-1 border border-red-200 text-red-700 rounded-lg px-4 py-2 text-sm hover:bg-red-100 transition-colors">
@@ -244,6 +258,28 @@ export default function EventDetailClient({
             <button onClick={handleCancel} disabled={cancelling}
               className="flex-1 bg-red-600 text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-red-700 transition-colors disabled:opacity-50">
               {cancelling ? "Cancelling…" : "Yes, cancel event"}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Over-capacity promote confirmation */}
+      {overCapacityConfirm && (
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-5 mb-8">
+          <p className="text-sm font-medium text-amber-900 mb-1">Event is currently full</p>
+          <p className="text-xs text-amber-800 mb-4">
+            Are you sure you want to move <strong>{overCapacityConfirm.name}</strong> to confirmed? This will exceed your set capacity.
+          </p>
+          <div className="flex gap-3">
+            <button onClick={() => setOverCapacityConfirm(null)}
+              className="flex-1 border border-amber-300 text-amber-800 rounded-lg px-4 py-2 text-sm hover:bg-amber-100 transition-colors">
+              Cancel
+            </button>
+            <button
+              onClick={() => handlePromote(overCapacityConfirm.id, true)}
+              disabled={promotingId === overCapacityConfirm.id}
+              className="flex-1 bg-amber-600 text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-amber-700 transition-colors disabled:opacity-50">
+              {promotingId === overCapacityConfirm.id ? "Moving…" : "Yes, confirm anyway"}
             </button>
           </div>
         </div>

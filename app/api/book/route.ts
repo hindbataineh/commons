@@ -92,15 +92,17 @@ export async function POST(req: NextRequest) {
       amountSpent: 0,
     });
 
-    sendBookingConfirmation({
-      to: member_email,
-      memberName: member_name,
-      eventName: event.name,
-      eventDate: formatDate(event.event_date),
-      eventTime: formatTime(event.event_time),
-      eventLocation: event.location,
-      communityName: community.name,
-    }).catch(console.error);
+    if (bookingStatus === "confirmed") {
+      await sendBookingConfirmation({
+        to: member_email,
+        memberName: member_name,
+        eventName: event.name,
+        eventDate: formatDate(event.event_date),
+        eventTime: formatTime(event.event_time),
+        eventLocation: event.location,
+        communityName: community.name,
+      }).catch(console.error);
+    }
 
     return NextResponse.json({ success: true, status: bookingStatus });
   } catch (err) {

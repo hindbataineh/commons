@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
       .single();
     if (!community) return NextResponse.json({ error: "Community not found" }, { status: 404 });
 
-    const { bookingId } = await req.json();
+    const { bookingId, force } = await req.json();
     if (!bookingId) return NextResponse.json({ error: "Missing bookingId" }, { status: 400 });
 
     // Fetch the booking with event info
@@ -48,8 +48,8 @@ export async function POST(req: NextRequest) {
       .eq("event_id", event.id)
       .eq("status", "confirmed");
 
-    if ((confirmedCount ?? 0) >= event.capacity) {
-      return NextResponse.json({ error: "Event is still full" }, { status: 400 });
+    if (!force && (confirmedCount ?? 0) >= event.capacity) {
+      return NextResponse.json({ error: "Event is still full", code: "OVER_CAPACITY" }, { status: 400 });
     }
 
     // Promote
