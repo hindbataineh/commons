@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
       .select("id")
       .eq("event_id", event_id)
       .eq("member_email", member_email)
-      .eq("status", "confirmed")
+      .in("status", ["confirmed", "pending"])
       .maybeSingle();
 
     if (existingBooking) {
@@ -107,6 +107,7 @@ export async function POST(req: NextRequest) {
       member_whatsapp: member_whatsapp || null,
       status: "pending",
       payment_status: "pending",
+      stripe_payment_intent_id: session.id,
       amount_paid: 0,
     });
 

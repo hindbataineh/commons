@@ -332,7 +332,7 @@ export default function OnboardingPage() {
               <label className={baseLabel}>Event name</label>
               <input
                 className={baseInput}
-                placeholder="Saturday Morning Run"
+                placeholder="Event name"
                 value={event.name}
                 onChange={(e) => setEvent((p) => ({ ...p, name: e.target.value }))}
               />

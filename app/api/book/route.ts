@@ -3,6 +3,8 @@ import { createServiceClient } from "@/lib/supabase/server";
 import { sendBookingConfirmation } from "@/lib/resend";
 import { formatDate, formatTime } from "@/lib/utils";
 
+console.log("RESEND_API_KEY exists:", !!process.env.RESEND_API_KEY);
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
@@ -93,15 +95,19 @@ export async function POST(req: NextRequest) {
     });
 
     if (bookingStatus === "confirmed") {
-      await sendBookingConfirmation({
-        to: member_email,
-        memberName: member_name,
-        eventName: event.name,
-        eventDate: formatDate(event.event_date),
-        eventTime: formatTime(event.event_time),
-        eventLocation: event.location,
-        communityName: community.name,
-      }).catch(console.error);
+      try {
+        await sendBookingConfirmation({
+          to: member_email,
+          memberName: member_name,
+          eventName: event.name,
+          eventDate: formatDate(event.event_date),
+          eventTime: formatTime(event.event_time),
+          eventLocation: event.location,
+          communityName: community.name,
+        });
+      } catch (emailErr) {
+        console.error("sendBookingConfirmation failed:", emailErr);
+      }
     }
 
     return NextResponse.json({ success: true, status: bookingStatus });

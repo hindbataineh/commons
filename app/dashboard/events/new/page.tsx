@@ -167,7 +167,7 @@ export default function NewEventPage() {
           <label className={baseLabel}>Event name *</label>
           <input
             className={baseInput}
-            placeholder="Saturday Morning Run"
+            placeholder="Event name"
             value={form.name}
             onChange={(e) => set("name", e.target.value)}
           />
