@@ -42,16 +42,16 @@ export default function LoginPage() {
 
         <div className="mt-16 md:mt-0">
           <h1 className="font-display text-4xl md:text-5xl font-medium text-cream leading-tight mb-5">
-            Run your community<br className="hidden md:block" /> like a business
+            Run your community<br className="hidden md:block" /> in one dashboard
           </h1>
           <p className="text-sand/80 text-base leading-relaxed mb-10 max-w-sm">
-            Bookings, members, payments and insights — built for community hosts in the GCC. No more WhatsApp chaos.
+            Bookings, members, payments and insights — everything you need to manage and grow your community in one place.
           </p>
           <ul className="flex flex-col gap-4">
             {[
               "Shareable booking links in seconds",
               "Know your members, not just attendees",
-              "Built for how the GCC runs communities",
+              "Built for how you run communities",
             ].map((point) => (
               <li key={point} className="flex items-start gap-3">
                 <span className="mt-0.5 w-5 h-5 rounded-full bg-terracotta/20 flex items-center justify-center shrink-0">
