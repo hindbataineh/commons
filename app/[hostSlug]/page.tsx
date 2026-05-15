@@ -145,21 +145,23 @@ export default async function CommunityPage({ params }: Props) {
                       </div>
                     </div>
 
-                    {/* Capacity */}
-                    <div>
-                      <div className="flex justify-between text-xs text-muted mb-1.5">
-                        <span>{booked} going</span>
-                        <span className={isFull ? "text-terracotta font-medium" : ""}>
-                          {isFull ? "Full — join waitlist" : `${spotsLeft} spot${spotsLeft === 1 ? "" : "s"} left`}
-                        </span>
+                    {/* Capacity — only shown at ≥70% full or sold out */}
+                    {(fillPercent >= 70 || isFull) && (
+                      <div>
+                        <div className="flex justify-between text-xs text-muted mb-1.5">
+                          <span>{booked} going</span>
+                          <span className={isFull ? "text-terracotta font-medium" : ""}>
+                            {isFull ? "Full — join waitlist" : `${spotsLeft} spot${spotsLeft === 1 ? "" : "s"} left`}
+                          </span>
+                        </div>
+                        <div className="h-1 bg-sand rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-terracotta rounded-full"
+                            style={{ width: `${fillPercent}%` }}
+                          />
+                        </div>
                       </div>
-                      <div className="h-1 bg-sand rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-terracotta rounded-full"
-                          style={{ width: `${fillPercent}%` }}
-                        />
-                      </div>
-                    </div>
+                    )}
                   </div>
                 </Link>
               );
