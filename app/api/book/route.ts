@@ -6,6 +6,7 @@ import { formatDate, formatTime } from "@/lib/utils";
 console.log("RESEND_API_KEY exists:", !!process.env.RESEND_API_KEY);
 
 export async function POST(req: NextRequest) {
+  console.log('[email] RESEND_API_KEY present:', !!process.env.RESEND_API_KEY);
   try {
     const body = await req.json();
     const { event_id, member_name, member_email, member_whatsapp } = body;
@@ -108,6 +109,7 @@ export async function POST(req: NextRequest) {
       } catch (emailErr) {
         console.error("sendBookingConfirmation failed:", emailErr);
       }
+      console.log('[email] confirmation email attempted');
     }
 
     return NextResponse.json({ success: true, status: bookingStatus });
