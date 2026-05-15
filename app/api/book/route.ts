@@ -97,7 +97,8 @@ export async function POST(req: NextRequest) {
 
     if (bookingStatus === "confirmed") {
       try {
-        await sendBookingConfirmation({
+        console.log('[email] attempting to send to:', member_email);
+        const emailResult = await sendBookingConfirmation({
           to: member_email,
           memberName: member_name,
           eventName: event.name,
@@ -106,10 +107,10 @@ export async function POST(req: NextRequest) {
           eventLocation: event.location,
           communityName: community.name,
         });
-      } catch (emailErr) {
-        console.error("sendBookingConfirmation failed:", emailErr);
+        console.log('[email] result:', JSON.stringify(emailResult));
+      } catch (emailError) {
+        console.error('[email] failed:', emailError);
       }
-      console.log('[email] confirmation email attempted');
     }
 
     return NextResponse.json({ success: true, status: bookingStatus });
