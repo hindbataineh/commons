@@ -117,6 +117,7 @@ export default function OnboardingPage() {
       console.log("[onboarding] inserting community...", community.slug);
       const { data: newCommunity, error: communityError } = await supabase
         .from("communities")
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .insert({
           host_id: user.id,
           name: community.name,
@@ -127,7 +128,7 @@ export default function OnboardingPage() {
           description: community.description,
           instagram_handle: community.instagram_handle,
           website: community.website || null,
-        })
+        } as any)
         .select("id")
         .single();
 
