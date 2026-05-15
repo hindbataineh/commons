@@ -27,8 +27,8 @@ export default async function DashboardPage() {
       {quietMembersCount > 0 && (
         <div className="mb-6 bg-amber-50 border border-amber-200 rounded-xl px-5 py-4 flex items-center justify-between gap-4">
           <p className="text-sm text-amber-800">
-            <strong>{quietMembersCount} member{quietMembersCount !== 1 ? "s" : ""}</strong>{" "}
-            haven&rsquo;t attended in 14+ days.
+            <strong>{quietMembersCount} regular{quietMembersCount !== 1 ? "s" : ""}</strong>{" "}
+            have missed your last 3 events.
           </p>
           <Link
             href="/dashboard/members"

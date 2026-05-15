@@ -25,9 +25,6 @@ export async function getDashboardOverview(supabase: Client, hostId: string) {
   const now = new Date();
   const todayStr = now.toISOString().split("T")[0];
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-  const fourteenDaysAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000)
-    .toISOString()
-    .split("T")[0];
 
   const [{ data: events }, { data: members }] = await Promise.all([
     supabase
@@ -94,10 +91,9 @@ export async function getDashboardOverview(supabase: Client, hostId: string) {
   const returningCount = allMembers.filter((m) => m.total_bookings > 1).length;
   const returnRate = totalMembers > 0 ? returningCount / totalMembers : 0;
 
-  // Alert: quiet members
-  const quietMembersCount = allMembers.filter(
-    (m) => !m.last_attended || m.last_attended < fourteenDaysAgo
-  ).length;
+  // Alert: lapsed regulars (established members who missed 3+ events since last attendance)
+  const lapsedRegulars = await getLapsedRegulars(community.id);
+  const quietMembersCount = lapsedRegulars.length;
 
   // Next 3 upcoming events
   const nextEvents = upcomingEvents.slice(0, 3).map((e) => ({
@@ -254,20 +250,64 @@ export async function getPaymentsData(supabase: Client, communityId: string) {
   return { transactions, stats: { revenueThisMonth, totalRevenue, avgPerBooking } };
 }
 
-// ─── Alerts page ──────────────────────────────────────────────────────────────
+// ─── Lapsed regular detection ─────────────────────────────────────────────────
+// A "lapsed regular" is an established member (≥2 bookings) who has missed
+// 3 or more events since their last_attended date (within a 30-day lookback).
 
-export async function getAlertsData(supabase: Client, communityId: string) {
-  const fourteenDaysAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000)
+export async function getLapsedRegulars(communityId: string) {
+  const svc = createServiceClient();
+  const todayStr = new Date().toISOString().split("T")[0];
+  const lookbackStr = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
     .toISOString()
     .split("T")[0];
-  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
 
-  const [{ data: quietMembers }, { data: newMembers }, { data: activeEvents }] = await Promise.all([
-    supabase
+  const [{ data: members }, { data: events }] = await Promise.all([
+    svc
       .from("members")
       .select("id, name, email, last_attended")
       .eq("community_id", communityId)
-      .or(`last_attended.lt.${fourteenDaysAgo},last_attended.is.null`),
+      .gte("total_bookings", 2),
+    svc
+      .from("events")
+      .select("id, event_date")
+      .eq("community_id", communityId)
+      .eq("status", "active")
+      .lte("event_date", todayStr)
+      .gte("event_date", lookbackStr),
+  ]);
+
+  if (!members || members.length === 0 || !events || events.length === 0) return [];
+
+  const eventIds = events.map((e) => e.id);
+
+  const { data: bookings } = await svc
+    .from("bookings")
+    .select("event_id, member_email")
+    .in("event_id", eventIds)
+    .eq("status", "confirmed");
+
+  const bookedSet = new Set<string>();
+  for (const b of bookings ?? []) {
+    bookedSet.add(`${b.member_email}:${b.event_id}`);
+  }
+
+  return members.filter((member) => {
+    const sinceDate = member.last_attended ?? "2000-01-01";
+    const relevantEvents = events.filter((e) => e.event_date > sinceDate);
+    const missedCount = relevantEvents.filter(
+      (e) => !bookedSet.has(`${member.email}:${e.id}`)
+    ).length;
+    return missedCount >= 3;
+  });
+}
+
+// ─── Alerts page ──────────────────────────────────────────────────────────────
+
+export async function getAlertsData(supabase: Client, communityId: string) {
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+
+  const [quietMembers, { data: newMembers }, { data: activeEvents }] = await Promise.all([
+    getLapsedRegulars(communityId),
     supabase
       .from("members")
       .select("id, name, email, created_at")
@@ -310,7 +350,7 @@ export async function getAlertsData(supabase: Client, communityId: string) {
   }
 
   return {
-    quietMembers: quietMembers ?? [],
+    quietMembers,
     newMembers: newMembers ?? [],
     waitlistEvents,
   };

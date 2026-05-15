@@ -33,9 +33,9 @@ export default async function AlertsPage() {
       <div className="flex flex-col gap-5">
         {/* ── Quiet members ── */}
         <AlertCard
-          title="Members going quiet"
+          title="Regulars going quiet"
           count={quietMembers.length}
-          emptyMessage="All members have attended recently."
+          emptyMessage="No regulars have gone quiet — everyone's showing up."
           accentColor="amber"
           action={quietMembers.length > 0 ? { label: "View all members →", href: "/dashboard/members" } : undefined}
         >
