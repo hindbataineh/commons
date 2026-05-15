@@ -149,6 +149,7 @@ export default function OnboardingPage() {
       console.log("[onboarding] community created:", newCommunity.id);
       console.log("[onboarding] inserting event...", event.name);
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { error: eventError } = await supabase.from("events").insert({
         community_id: newCommunity.id,
         name: event.name,
@@ -164,7 +165,7 @@ export default function OnboardingPage() {
         is_recurring: event.repeat !== "one-off",
         recurrence_rule: event.repeat === "one-off" ? null : event.repeat,
         status: "active",
-      });
+      } as any);
 
       if (eventError) {
         console.error("[onboarding] event insert error:", eventError);

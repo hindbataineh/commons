@@ -38,7 +38,8 @@ export default async function EventAttendeesPage({ params }: Props) {
 
   return (
     <EventDetailClient
-      event={event}
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      event={event as any}
       bookings={bookings ?? []}
     />
   );

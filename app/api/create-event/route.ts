@@ -54,6 +54,7 @@ export async function POST(req: NextRequest) {
 
     const { data: newEvent, error: insertError } = await svc
       .from("events")
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .insert({
         community_id: community.id,
         name,
@@ -69,7 +70,7 @@ export async function POST(req: NextRequest) {
         is_recurring: repeat !== "one-off",
         recurrence_rule: repeat === "one-off" ? null : repeat,
         status: "active",
-      })
+      } as any)
       .select("id")
       .single();
 

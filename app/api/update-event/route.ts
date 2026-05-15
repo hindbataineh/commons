@@ -27,6 +27,7 @@ export async function POST(req: NextRequest) {
 
     const { error: updateError } = await svc
       .from("events")
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .update({
         name,
         event_date: date,
@@ -36,7 +37,7 @@ export async function POST(req: NextRequest) {
         description: description || null,
         capacity: parseInt(capacity, 10) || 20,
         price: priceFils,
-      })
+      } as any)
       .eq("id", eventId)
       .eq("community_id", community.id);
 
