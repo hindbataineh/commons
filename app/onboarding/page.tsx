@@ -11,9 +11,11 @@ interface CommunityForm {
   name: string;
   slug: string;
   type: string;
+  custom_type: string;
   location: string;
   description: string;
   instagram_handle: string;
+  website: string;
 }
 
 interface EventForm {
@@ -37,11 +39,16 @@ function generateSlug(name: string): string {
 }
 
 const COMMUNITY_TYPES = [
-  { value: "run_club", label: "Run Club" },
-  { value: "fitness", label: "Fitness" },
+  { value: "run_club", label: "Run club" },
+  { value: "fitness", label: "Fitness & gym" },
   { value: "yoga", label: "Yoga" },
-  { value: "creative", label: "Creative" },
-  { value: "social", label: "Social" },
+  { value: "pilates", label: "Pilates" },
+  { value: "wellness", label: "Wellness" },
+  { value: "tennis", label: "Tennis" },
+  { value: "padel", label: "Padel" },
+  { value: "ladies_only", label: "Ladies only" },
+  { value: "creative", label: "Creative workshop" },
+  { value: "social", label: "Social club" },
   { value: "sports", label: "Sports" },
   { value: "other", label: "Other" },
 ];
@@ -60,9 +67,11 @@ export default function OnboardingPage() {
     name: "",
     slug: "",
     type: "run_club",
+    custom_type: "",
     location: "",
     description: "",
     instagram_handle: "",
+    website: "",
   });
 
   const [event, setEvent] = useState<EventForm>({
@@ -113,9 +122,11 @@ export default function OnboardingPage() {
           name: community.name,
           slug: community.slug,
           type: community.type,
+          custom_type: community.type === "other" ? community.custom_type || null : null,
           location: community.location,
-          description: community.description || null,
-          instagram_handle: community.instagram_handle || null,
+          description: community.description,
+          instagram_handle: community.instagram_handle,
+          website: community.website || null,
         })
         .select("id")
         .single();
@@ -240,16 +251,24 @@ export default function OnboardingPage() {
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label className={baseLabel}>Type</label>
+              <label className={baseLabel}>Type of community</label>
               <select
                 className={baseInput}
                 value={community.type}
-                onChange={(e) => setCommunity((p) => ({ ...p, type: e.target.value }))}
+                onChange={(e) => setCommunity((p) => ({ ...p, type: e.target.value, custom_type: "" }))}
               >
                 {COMMUNITY_TYPES.map((t) => (
                   <option key={t.value} value={t.value}>{t.label}</option>
                 ))}
               </select>
+              {community.type === "other" && (
+                <input
+                  className={baseInput}
+                  placeholder="e.g. Cycling club"
+                  value={community.custom_type}
+                  onChange={(e) => setCommunity((p) => ({ ...p, custom_type: e.target.value }))}
+                />
+              )}
             </div>
 
             <div className="flex flex-col gap-1.5">
@@ -263,9 +282,7 @@ export default function OnboardingPage() {
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label className={baseLabel}>
-                Description <span className="text-muted font-normal">(optional)</span>
-              </label>
+              <label className={baseLabel}>Description *</label>
               <textarea
                 className={`${baseInput} resize-none`}
                 rows={3}
@@ -276,14 +293,25 @@ export default function OnboardingPage() {
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label className={baseLabel}>
-                Instagram <span className="text-muted font-normal">(optional)</span>
-              </label>
+              <label className={baseLabel}>Instagram handle *</label>
               <input
                 className={baseInput}
-                placeholder="@yourhandle"
+                placeholder="@yourcommunity"
                 value={community.instagram_handle}
                 onChange={(e) => setCommunity((p) => ({ ...p, instagram_handle: e.target.value }))}
+              />
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label className={baseLabel}>
+                Website <span className="text-muted font-normal">(optional)</span>
+              </label>
+              <input
+                type="url"
+                className={baseInput}
+                placeholder="https://yourwebsite.com"
+                value={community.website}
+                onChange={(e) => setCommunity((p) => ({ ...p, website: e.target.value }))}
               />
             </div>
 
@@ -311,6 +339,18 @@ export default function OnboardingPage() {
               onClick={() => {
                 if (!community.name || !community.location || !community.slug) {
                   setError("Please fill in name, type, and location.");
+                  return;
+                }
+                if (!community.description) {
+                  setError("Please add a description for your community.");
+                  return;
+                }
+                if (!community.instagram_handle) {
+                  setError("Please enter your Instagram handle.");
+                  return;
+                }
+                if (community.type === "other" && !community.custom_type) {
+                  setError("Please describe your community type.");
                   return;
                 }
                 setError("");
@@ -415,9 +455,7 @@ export default function OnboardingPage() {
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label className={baseLabel}>
-                Description <span className="text-muted font-normal">(optional)</span>
-              </label>
+              <label className={baseLabel}>Description *</label>
               <textarea
                 className={`${baseInput} resize-none`}
                 rows={3}
@@ -443,6 +481,10 @@ export default function OnboardingPage() {
                   }
                   if (!event.location && !community.location) {
                     setError("Please enter a location.");
+                    return;
+                  }
+                  if (!event.description) {
+                    setError("Please add a description for your event.");
                     return;
                   }
                   if (!event.location) setEvent((p) => ({ ...p, location: community.location }));

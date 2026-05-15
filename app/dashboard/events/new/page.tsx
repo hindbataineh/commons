@@ -40,7 +40,7 @@ export default function NewEventPage() {
   const isFree = isNaN(priceNum) || priceNum === 0;
 
   async function handleSave() {
-    if (!form.name || !form.date || !form.time || !form.location) {
+    if (!form.name || !form.date || !form.time || !form.location || !form.description) {
       setError("Please fill in all required fields.");
       return;
     }
@@ -251,9 +251,7 @@ export default function NewEventPage() {
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label className={baseLabel}>
-            Description <span className="text-muted font-normal">(optional)</span>
-          </label>
+          <label className={baseLabel}>Description *</label>
           <textarea
             className={`${baseInput} resize-none`}
             rows={3}
