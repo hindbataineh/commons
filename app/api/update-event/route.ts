@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
     if (!community) return NextResponse.json({ error: "Community not found" }, { status: 404 });
 
     const body = await req.json();
-    const { eventId, name, date, time, location, description, capacity, priceAed } = body;
+    const { eventId, name, date, time, location, locationUrl, description, capacity, priceAed } = body;
 
     if (!eventId || !name || !date || !time || !location) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -32,6 +32,7 @@ export async function POST(req: NextRequest) {
         event_date: date,
         event_time: time,
         location,
+        location_url: locationUrl || null,
         description: description || null,
         capacity: parseInt(capacity, 10) || 20,
         price: priceFils,

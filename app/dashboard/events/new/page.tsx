@@ -26,6 +26,7 @@ export default function NewEventPage() {
     date: "",
     time: "",
     location: "",
+    locationUrl: "",
     description: "",
     priceAed: "0",
     capacity: "20",
@@ -57,6 +58,7 @@ export default function NewEventPage() {
           date: form.date,
           time: form.time,
           location: form.location,
+          locationUrl: form.locationUrl,
           description: form.description,
           priceAed: form.priceAed,
           capacity: form.capacity,
@@ -201,6 +203,19 @@ export default function NewEventPage() {
             placeholder="Kite Beach, Dubai"
             value={form.location}
             onChange={(e) => set("location", e.target.value)}
+          />
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+          <label className={baseLabel}>
+            Location link <span className="text-muted font-normal">(optional)</span>
+          </label>
+          <input
+            type="url"
+            className={baseInput}
+            placeholder="https://maps.google.com/..."
+            value={form.locationUrl}
+            onChange={(e) => set("locationUrl", e.target.value)}
           />
         </div>
 

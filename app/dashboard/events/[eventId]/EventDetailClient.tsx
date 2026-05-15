@@ -19,6 +19,7 @@ type EventData = {
   event_date: string;
   event_time: string;
   location: string;
+  location_url: string | null;
   slug: string;
   description: string | null;
   capacity: number;
@@ -65,6 +66,7 @@ export default function EventDetailClient({
     date: event.event_date,
     time: event.event_time,
     location: event.location,
+    locationUrl: event.location_url ?? "",
     description: event.description ?? "",
     capacity: String(event.capacity),
     priceAed: String(event.price / 100),
@@ -79,7 +81,7 @@ export default function EventDetailClient({
     const res = await fetch("/api/update-event", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ eventId: event.id, ...editForm }),
+      body: JSON.stringify({ eventId: event.id, ...editForm, locationUrl: editForm.locationUrl }),
     });
     const json = await res.json();
     if (!res.ok) {
@@ -205,6 +207,11 @@ export default function EventDetailClient({
               <label className={baseLabel}>Location</label>
               <input className={baseInput} value={editForm.location}
                 onChange={(e) => setEditForm((p) => ({ ...p, location: e.target.value }))} />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label className={baseLabel}>Location link <span className="text-muted font-normal">(optional)</span></label>
+              <input type="url" className={baseInput} placeholder="https://maps.google.com/..." value={editForm.locationUrl}
+                onChange={(e) => setEditForm((p) => ({ ...p, locationUrl: e.target.value }))} />
             </div>
             <div className="flex flex-col gap-1.5">
               <label className={baseLabel}>Description <span className="text-muted font-normal">(optional)</span></label>

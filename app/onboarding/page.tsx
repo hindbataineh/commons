@@ -23,6 +23,7 @@ interface EventForm {
   date: string;
   time: string;
   location: string;
+  locationUrl: string;
   description: string;
   priceAed: string;
   capacity: string;
@@ -79,6 +80,7 @@ export default function OnboardingPage() {
     date: "",
     time: "",
     location: "",
+    locationUrl: "",
     description: "",
     priceAed: "0",
     capacity: "20",
@@ -152,6 +154,7 @@ export default function OnboardingPage() {
         name: event.name,
         slug: generateSlug(event.name),
         location: event.location || community.location,
+        location_url: event.locationUrl || null,
         description: event.description || null,
         event_date: event.date,
         event_time: event.time,
@@ -406,6 +409,19 @@ export default function OnboardingPage() {
                 className={baseInput}
                 value={event.location || community.location}
                 onChange={(e) => setEvent((p) => ({ ...p, location: e.target.value }))}
+              />
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label className={baseLabel}>
+                Location link <span className="text-muted font-normal">(optional)</span>
+              </label>
+              <input
+                type="url"
+                className={baseInput}
+                placeholder="https://maps.google.com/..."
+                value={event.locationUrl}
+                onChange={(e) => setEvent((p) => ({ ...p, locationUrl: e.target.value }))}
               />
             </div>
 

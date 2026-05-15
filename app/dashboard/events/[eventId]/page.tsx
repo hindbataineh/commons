@@ -22,7 +22,7 @@ export default async function EventAttendeesPage({ params }: Props) {
 
   const { data: event } = await svc
     .from("events")
-    .select("id, name, event_date, event_time, location, slug, description, capacity, price, status")
+    .select("id, name, event_date, event_time, location, location_url, slug, description, capacity, price, status")
     .eq("id", eventId)
     .eq("community_id", community.id)
     .single();
