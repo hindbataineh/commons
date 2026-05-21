@@ -63,6 +63,8 @@ export default async function CommunityPage({ params }: Props) {
   }
 
   const typeLabel = communityTypeLabel[community.type] ?? "Community";
+  const titleCase = (str: string) =>
+    str.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.slice(1).toLowerCase());
 
   return (
     <main className="min-h-screen bg-off-white px-4 py-10 md:py-16">
@@ -73,7 +75,7 @@ export default async function CommunityPage({ params }: Props) {
             {typeLabel}
           </span>
           <h1 className="font-display text-4xl md:text-5xl font-medium leading-tight text-charcoal mb-3">
-            {community.name}
+            {titleCase(community.name)}
           </h1>
           <div className="flex items-center gap-2 text-sm text-muted mb-4">
             <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -116,7 +118,7 @@ export default async function CommunityPage({ params }: Props) {
                   <div className="bg-white border border-sand rounded-xl p-5 transition-colors group-hover:border-charcoal/30 group-hover:bg-cream/40">
                     <div className="flex items-start justify-between gap-3 mb-3">
                       <h3 className="font-medium text-charcoal group-hover:text-terracotta transition-colors">
-                        {event.name}
+                        {titleCase(event.name)}
                       </h3>
                       {event.price === 0 ? (
                         <span className="shrink-0 inline-block bg-charcoal text-white text-xs font-medium px-2.5 py-0.5 rounded-full">

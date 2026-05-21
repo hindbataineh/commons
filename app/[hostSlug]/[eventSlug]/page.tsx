@@ -42,17 +42,20 @@ export default async function EventPage({ params }: Props) {
   const isFull = spotsLeft <= 0;
   const fillPercent = Math.min(100, Math.round((confirmedCount / event.capacity) * 100));
 
+  const titleCase = (str: string) =>
+    str.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.slice(1).toLowerCase());
+
   return (
     <main className="min-h-screen bg-off-white px-4 py-10 md:py-16">
       <div className="max-w-lg mx-auto">
         {/* Community name — links back to community page */}
         <Link href={`/${hostSlug}`} className="text-sm text-muted mb-6 inline-flex items-center gap-1 hover:text-charcoal hover:underline transition-colors">
-          ← {community.name}
+          ← {titleCase(community.name)}
         </Link>
 
         {/* Event name */}
         <h1 className="font-display text-4xl md:text-5xl font-medium leading-tight text-charcoal mb-6">
-          {event.name}
+          {titleCase(event.name)}
         </h1>
 
         {/* Meta row */}

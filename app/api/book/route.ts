@@ -67,7 +67,10 @@ export async function POST(req: NextRequest) {
     const isFull = confirmedCount >= event.capacity;
     const bookingStatus = isFull ? "waitlisted" : "confirmed";
 
-    const { error: bookingError } = await supabase.from("bookings").insert({
+    const bookingRef = "CM" + Date.now().toString(36).toUpperCase().slice(-6);
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error: bookingError } = await (supabase.from("bookings") as any).insert({
       event_id,
       member_name,
       member_email,
@@ -75,6 +78,7 @@ export async function POST(req: NextRequest) {
       status: bookingStatus,
       payment_status: "free",
       amount_paid: 0,
+      booking_ref: bookingRef,
     });
 
     if (bookingError) {
@@ -113,7 +117,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    return NextResponse.json({ success: true, status: bookingStatus });
+    return NextResponse.json({ success: true, status: bookingStatus, ref: bookingRef });
   } catch (err) {
     console.error("Book route error:", err);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });

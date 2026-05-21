@@ -31,9 +31,9 @@ export default async function MembersPage() {
       {/* Stat cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <StatCard label="Total" value={stats.total.toString()} />
-        <StatCard label="Regulars (5+ bookings)" value={stats.regulars.toString()} />
-        <StatCard label="At risk" value={stats.atRisk.toString()} sub="14+ days inactive" />
-        <StatCard label="New this month" value={stats.newThisMonth.toString()} />
+        <StatCard label="Regulars" value={stats.regulars.toString()} sub="Members who have booked 5 or more events" />
+        <StatCard label="At risk" value={stats.atRisk.toString()} sub="Members who have missed your last 3 or more events" />
+        <StatCard label="New this month" value={stats.newThisMonth.toString()} sub="Members who joined in the last 30 days" />
       </div>
 
       {/* Members table */}

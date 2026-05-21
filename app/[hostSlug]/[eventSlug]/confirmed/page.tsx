@@ -2,15 +2,16 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { formatDate, formatTime } from "@/lib/utils";
+import AddToCalendar from "./AddToCalendar";
 
 interface Props {
   params: Promise<{ hostSlug: string; eventSlug: string }>;
-  searchParams: Promise<{ name?: string; status?: string }>;
+  searchParams: Promise<{ name?: string; status?: string; email?: string; ref?: string }>;
 }
 
 export default async function ConfirmedPage({ params, searchParams }: Props) {
   const { hostSlug, eventSlug } = await params;
-  const { name, status } = await searchParams;
+  const { name, status, email, ref } = await searchParams;
   const isWaitlisted = status === "waitlisted";
 
   const supabase = await createClient();
@@ -53,16 +54,16 @@ export default async function ConfirmedPage({ params, searchParams }: Props) {
           {community.name}
         </p>
         <h1 className="font-display text-5xl font-medium text-charcoal mb-2">
-          {isWaitlisted ? "You’re on the waitlist." : "You’re in."}
+          {isWaitlisted ? "You're on the waitlist." : "You're in."}
         </h1>
         <p className="text-muted mb-10">
           {isWaitlisted
-            ? "We’ll notify you by email if a spot opens up. You haven’t been charged anything."
+            ? "We'll notify you by email if a spot opens up. You haven't been charged anything."
             : name ? `See you there, ${name}.` : "See you there."}
         </p>
 
         {/* Event detail card */}
-        <div className="bg-cream border border-sand rounded-xl p-6 text-left mb-8">
+        <div className="bg-cream border border-sand rounded-xl p-6 text-left mb-4">
           <p className="font-medium text-charcoal mb-3">{event.name}</p>
           <div className="flex flex-col gap-2 text-sm text-muted">
             <div className="flex items-center gap-2">
@@ -81,10 +82,27 @@ export default async function ConfirmedPage({ params, searchParams }: Props) {
           </div>
         </div>
 
+        {/* Booking ref */}
+        {ref && (
+          <p className="text-xs text-muted mb-6">Booking ref: <span className="font-mono font-medium text-charcoal">{ref}</span></p>
+        )}
+
+        {/* Add to calendar — confirmed only */}
+        {!isWaitlisted && (
+          <AddToCalendar
+            eventName={event.name}
+            eventDate={event.event_date}
+            eventTime={event.event_time}
+            eventLocation={event.location}
+          />
+        )}
+
         {/* Reminder note */}
         {!isWaitlisted && (
           <p className="text-sm text-muted mb-8">
-            You&rsquo;ll receive a reminder email before the event.
+            {email
+              ? <>A reminder will be sent to <span className="text-charcoal font-medium">{email}</span></>
+              : "You'll receive a reminder email before the event."}
           </p>
         )}
 
