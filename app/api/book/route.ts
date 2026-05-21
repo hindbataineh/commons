@@ -142,6 +142,9 @@ async function upsertMember({
   eventDate: string;
   amountSpent: number;
 }) {
+  const today = new Date().toISOString().split("T")[0];
+  const shouldUpdateAttended = eventDate <= today;
+
   const { data: existing } = await supabase
     .from("members")
     .select("id, total_bookings, total_spent")
@@ -157,7 +160,7 @@ async function upsertMember({
         whatsapp: whatsapp ?? undefined,
         total_bookings: existing.total_bookings + 1,
         total_spent: existing.total_spent + amountSpent,
-        last_attended: eventDate,
+        ...(shouldUpdateAttended && { last_attended: eventDate }),
       })
       .eq("id", existing.id);
   } else {
@@ -168,7 +171,7 @@ async function upsertMember({
       whatsapp,
       total_bookings: 1,
       total_spent: amountSpent,
-      last_attended: eventDate,
+      last_attended: shouldUpdateAttended ? eventDate : null,
       status: "new",
     });
   }
