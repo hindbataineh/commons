@@ -11,6 +11,11 @@ export function formatPrice(amount: number, currency = "AED"): string {
   return `${currency} ${major % 1 === 0 ? major.toFixed(0) : major.toFixed(2)}`;
 }
 
+export function formatRevenue(amount: number, currency = "AED"): string {
+  const major = amount / 100;
+  return `${currency} ${major % 1 === 0 ? major.toFixed(0) : major.toFixed(2)}`;
+}
+
 export function formatDate(dateStr: string): string {
   const date = new Date(dateStr + "T00:00:00");
   return date.toLocaleDateString("en-GB", {

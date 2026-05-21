@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { getDashboardOverview } from "@/lib/queries";
-import { formatPrice, formatShortDate, formatTime } from "@/lib/utils";
+import { formatPrice, formatRevenue, formatShortDate, formatTime } from "@/lib/utils";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -44,7 +44,7 @@ export default async function DashboardPage() {
         <StatCard label="Total members" value={stats.totalMembers.toString()} />
         <StatCard
           label="Revenue this month"
-          value={stats.revenueThisMonth === 0 ? "—" : formatPrice(stats.revenueThisMonth)}
+          value={formatRevenue(stats.revenueThisMonth)}
         />
         <StatCard
           label="Avg fill rate"
@@ -92,7 +92,7 @@ export default async function DashboardPage() {
                       <div className="text-right shrink-0">
                         <p className="text-xs text-muted">Revenue</p>
                         <p className="text-sm font-medium text-charcoal">
-                          {event.revenue === 0 ? "—" : formatPrice(event.revenue)}
+                          {formatRevenue(event.revenue)}
                         </p>
                       </div>
                     </div>

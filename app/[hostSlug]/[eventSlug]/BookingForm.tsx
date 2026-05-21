@@ -151,7 +151,7 @@ export default function BookingForm({ eventId, hostSlug, eventSlug, isFree, isFu
       <Input
         name="member_name"
         label="Your name"
-        placeholder="Sarah Al Mazrouei"
+        placeholder="Your full name"
         required
         autoComplete="name"
       />
