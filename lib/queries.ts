@@ -173,26 +173,22 @@ export async function getAllMembers(supabase: Client, communityId: string) {
   return data ?? [];
 }
 
-export function computeMemberPageStats(members: MemberRow[]) {
+export function computeMemberPageStats(members: MemberRow[], lapsedIds: Set<string> = new Set()) {
   const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
-  const fourteenDaysAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000)
-    .toISOString()
-    .split("T")[0];
   return {
     total: members.length,
     regulars: members.filter((m) => m.total_bookings >= 5).length,
-    atRisk: members.filter((m) => !m.last_attended || m.last_attended < fourteenDaysAgo).length,
+    atRisk: lapsedIds.size,
     newThisMonth: members.filter((m) => m.created_at >= thirtyDaysAgo).length,
   };
 }
 
-export function getMemberStatusTag(member: MemberRow): { label: string; cls: string } {
-  const fourteenDaysAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000)
-    .toISOString()
-    .split("T")[0];
-  if (!member.last_attended || member.last_attended < fourteenDaysAgo) {
-    return { label: "At risk", cls: "text-red-600 bg-red-50" };
-  }
+export function getMemberStatusTag(
+  member: MemberRow,
+  lapsedIds: Set<string> = new Set()
+): { label: string; cls: string } {
+  if (lapsedIds.has(member.id)) return { label: "At risk", cls: "text-red-600 bg-red-50" };
+  if (member.total_bookings < 2) return { label: "New", cls: "text-blue-600 bg-blue-50" };
   if (member.total_bookings >= 10) return { label: "VIP", cls: "text-amber-700 bg-amber-50" };
   if (member.total_bookings >= 3) return { label: "Regular", cls: "text-green-700 bg-green-50" };
   return { label: "New", cls: "text-blue-600 bg-blue-50" };

@@ -5,10 +5,18 @@ import {
   getAllMembers,
   computeMemberPageStats,
   getMemberStatusTag,
+  getLapsedRegulars,
 } from "@/lib/queries";
 import { formatPrice, formatShortDate } from "@/lib/utils";
 
-export default async function MembersPage() {
+interface Props {
+  searchParams: Promise<{ filter?: string }>;
+}
+
+export default async function MembersPage({ searchParams }: Props) {
+  const { filter } = await searchParams;
+  const isAtRiskFilter = filter === "at-risk";
+
   const supabase = await createClient();
   const {
     data: { user },
@@ -18,8 +26,21 @@ export default async function MembersPage() {
   const community = await getCommunityForHost(supabase, user.id);
   if (!community) redirect("/onboarding");
 
-  const members = await getAllMembers(supabase, community.id);
-  const stats = computeMemberPageStats(members);
+  const [members, lapsedMembers] = await Promise.all([
+    getAllMembers(supabase, community.id),
+    getLapsedRegulars(community.id),
+  ]);
+
+  const lapsedIds = new Set(lapsedMembers.map((m) => m.id));
+  const stats = computeMemberPageStats(members, lapsedIds);
+
+  const sortedMembers = isAtRiskFilter
+    ? [...members].sort((a, b) => {
+        const aRisk = lapsedIds.has(a.id) ? 0 : 1;
+        const bRisk = lapsedIds.has(b.id) ? 0 : 1;
+        return aRisk - bRisk;
+      })
+    : members;
 
   return (
     <div className="p-8 max-w-5xl">
@@ -35,6 +56,18 @@ export default async function MembersPage() {
         <StatCard label="At risk" value={stats.atRisk.toString()} sub="Members who have missed your last 3 or more events" />
         <StatCard label="New this month" value={stats.newThisMonth.toString()} sub="Members who joined in the last 30 days" />
       </div>
+
+      {/* At-risk filter banner */}
+      {isAtRiskFilter && lapsedIds.size > 0 && (
+        <div className="mb-5 bg-amber-50 border border-amber-200 rounded-xl px-5 py-3.5 flex items-center gap-3">
+          <svg className="w-4 h-4 text-amber-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+          </svg>
+          <p className="text-sm text-amber-800">
+            These members have missed your last 3 events — they&apos;re sorted to the top.
+          </p>
+        </div>
+      )}
 
       {/* Members table */}
       {members.length === 0 ? (
@@ -55,12 +88,16 @@ export default async function MembersPage() {
               </tr>
             </thead>
             <tbody>
-              {members.map((member, i) => {
-                const tag = getMemberStatusTag(member);
+              {sortedMembers.map((member, i) => {
+                const tag = getMemberStatusTag(member, lapsedIds);
+                const isHighlighted = isAtRiskFilter && lapsedIds.has(member.id);
                 return (
                   <tr
                     key={member.id}
-                    className={i < members.length - 1 ? "border-b border-sand/60" : ""}
+                    className={[
+                      i < sortedMembers.length - 1 ? "border-b border-sand/60" : "",
+                      isHighlighted ? "bg-amber-50/50" : "",
+                    ].join(" ")}
                   >
                     <td className="px-5 py-3.5 font-medium text-charcoal">{member.name}</td>
                     <td className="px-5 py-3.5 text-muted">{member.email}</td>

@@ -31,7 +31,7 @@ export default async function DashboardPage() {
             have missed your last 3 events.
           </p>
           <Link
-            href="/dashboard/members"
+            href="/dashboard/members?filter=at-risk"
             className="text-sm text-amber-700 font-medium hover:underline whitespace-nowrap"
           >
             View members →

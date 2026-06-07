@@ -37,7 +37,7 @@ export default async function AlertsPage() {
           count={quietMembers.length}
           emptyMessage="No regulars have gone quiet — everyone's showing up."
           accentColor="amber"
-          action={quietMembers.length > 0 ? { label: "View all members →", href: "/dashboard/members" } : undefined}
+          action={quietMembers.length > 0 ? { label: "View all members →", href: "/dashboard/members?filter=at-risk" } : undefined}
         >
           {quietMembers.length > 0 && (
             <ul className="flex flex-col gap-1 mt-3">
