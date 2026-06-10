@@ -74,7 +74,7 @@ export default async function EventPage({ params }: Props) {
             {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
             {(event as any).location_url ? (
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              <a href={(event as any).location_url} target="_blank" rel="noopener noreferrer" className="hover:underline hover:text-charcoal transition-colors">
+              <a href={(event as any).location_url} target="_blank" rel="noopener noreferrer" className="underline hover:text-charcoal transition-colors">
                 {event.location}
               </a>
             ) : (
