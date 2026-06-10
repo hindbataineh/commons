@@ -29,7 +29,7 @@ const COUNTRY_CODES = [
   { code: "+961", label: "+961 Lebanon" },
 ];
 
-const BIRTH_YEARS = Array.from({ length: 2007 - 1950 + 1 }, (_, i) => 2007 - i);
+const BIRTH_YEARS = Array.from({ length: 2010 - 1950 + 1 }, (_, i) => 2010 - i);
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
