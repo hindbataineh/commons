@@ -9,9 +9,9 @@ export async function POST(req: NextRequest) {
   console.log('[email] RESEND_API_KEY present:', !!process.env.RESEND_API_KEY);
   try {
     const body = await req.json();
-    const { event_id, member_name, member_email, member_whatsapp } = body;
+    const { event_id, member_name, member_email, member_whatsapp, gender, birth_year } = body;
 
-    if (!event_id || !member_name || !member_email || !member_whatsapp) {
+    if (!event_id || !member_name || !member_email || !member_whatsapp || !gender || !birth_year) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
@@ -79,6 +79,8 @@ export async function POST(req: NextRequest) {
       payment_status: "free",
       amount_paid: 0,
       booking_ref: bookingRef,
+      gender,
+      birth_year,
     });
 
     if (bookingError) {
@@ -97,6 +99,8 @@ export async function POST(req: NextRequest) {
       whatsapp: member_whatsapp || null,
       eventDate: event.event_date,
       amountSpent: 0,
+      gender,
+      birth_year,
     });
 
     if (bookingStatus === "confirmed") {
@@ -132,6 +136,8 @@ async function upsertMember({
   whatsapp,
   eventDate,
   amountSpent,
+  gender,
+  birth_year,
 }: {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   supabase: any;
@@ -141,6 +147,8 @@ async function upsertMember({
   whatsapp: string | null;
   eventDate: string;
   amountSpent: number;
+  gender: string;
+  birth_year: number;
 }) {
   const today = new Date().toISOString().split("T")[0];
   const shouldUpdateAttended = eventDate <= today;
@@ -160,6 +168,8 @@ async function upsertMember({
         whatsapp: whatsapp ?? undefined,
         total_bookings: existing.total_bookings + 1,
         total_spent: existing.total_spent + amountSpent,
+        gender,
+        birth_year,
         ...(shouldUpdateAttended && { last_attended: eventDate }),
       })
       .eq("id", existing.id);
@@ -173,6 +183,8 @@ async function upsertMember({
       total_spent: amountSpent,
       last_attended: shouldUpdateAttended ? eventDate : null,
       status: "new",
+      gender,
+      birth_year,
     });
   }
 }

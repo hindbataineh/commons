@@ -29,6 +29,8 @@ const COUNTRY_CODES = [
   { code: "+961", label: "+961 Lebanon" },
 ];
 
+const BIRTH_YEARS = Array.from({ length: 2007 - 1950 + 1 }, (_, i) => 2007 - i);
+
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function validatePhone(code: string, digits: string): string | null {
@@ -91,6 +93,8 @@ export default function BookingForm({ eventId, hostSlug, eventSlug, isFree, isFu
     const form = e.currentTarget;
     const email = (form.elements.namedItem("member_email") as HTMLInputElement).value.trim();
     const rawNumber = (form.elements.namedItem("member_whatsapp_number") as HTMLInputElement).value;
+    const gender = (form.elements.namedItem("member_gender") as HTMLSelectElement).value;
+    const birthYearRaw = (form.elements.namedItem("member_birth_year") as HTMLSelectElement).value;
 
     // Email validation
     if (!EMAIL_RE.test(email)) {
@@ -110,6 +114,18 @@ export default function BookingForm({ eventId, hostSlug, eventSlug, isFree, isFu
       return;
     }
 
+    if (!gender) {
+      setError("Please select your gender");
+      setLoading(false);
+      return;
+    }
+
+    if (!birthYearRaw) {
+      setError("Please select your year of birth");
+      setLoading(false);
+      return;
+    }
+
     const member_whatsapp = `${countryCode}${normalised}`;
 
     const data = {
@@ -117,6 +133,8 @@ export default function BookingForm({ eventId, hostSlug, eventSlug, isFree, isFu
       member_name: (form.elements.namedItem("member_name") as HTMLInputElement).value.trim(),
       member_email: email,
       member_whatsapp,
+      gender,
+      birth_year: parseInt(birthYearRaw, 10),
     };
 
     try {
@@ -150,6 +168,8 @@ export default function BookingForm({ eventId, hostSlug, eventSlug, isFree, isFu
       setLoading(false);
     }
   }
+
+  const selectCls = "w-full rounded-lg border border-sand bg-white px-4 py-2.5 text-sm text-charcoal focus:outline-none focus:border-charcoal focus:ring-1 focus:ring-charcoal/20 transition-colors appearance-none";
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -194,6 +214,32 @@ export default function BookingForm({ eventId, hostSlug, eventSlug, isFree, isFu
             className="w-full rounded-lg border border-sand bg-white px-4 py-2.5 text-sm text-charcoal placeholder:text-muted/60 focus:outline-none focus:border-charcoal focus:ring-1 focus:ring-charcoal/20 transition-colors"
           />
         </div>
+      </div>
+
+      {/* Gender */}
+      <div className="flex flex-col gap-1.5">
+        <label className="text-sm font-medium text-charcoal">
+          Gender<span className="text-terracotta ml-0.5">*</span>
+        </label>
+        <select name="member_gender" defaultValue="" className={selectCls}>
+          <option value="" disabled>Select gender</option>
+          <option value="Female">Female</option>
+          <option value="Male">Male</option>
+          <option value="Prefer not to say">Prefer not to say</option>
+        </select>
+      </div>
+
+      {/* Year of birth */}
+      <div className="flex flex-col gap-1.5">
+        <label className="text-sm font-medium text-charcoal">
+          Year of birth<span className="text-terracotta ml-0.5">*</span>
+        </label>
+        <select name="member_birth_year" defaultValue="" className={selectCls}>
+          <option value="" disabled>Select year</option>
+          {BIRTH_YEARS.map((year) => (
+            <option key={year} value={year}>{year}</option>
+          ))}
+        </select>
       </div>
 
       {error && (
