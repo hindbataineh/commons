@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { formatDate, formatTime } from "@/lib/utils";
 import AddToCalendar from "./AddToCalendar";
 
@@ -24,14 +24,19 @@ export default async function ConfirmedPage({ params, searchParams }: Props) {
 
   if (!community) notFound();
 
-  const { data: event } = await supabase
-    .from("events")
-    .select("name, event_date, event_time, location")
+  const svc = createServiceClient();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: event } = await (svc.from("events") as any)
+    .select("name, event_date, event_time, location, location_url")
     .eq("community_id", community.id)
     .eq("slug", eventSlug)
     .single();
 
   if (!event) notFound();
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const eventData = event as any;
+  const locationUrl = eventData.location_url as string | null;
 
   return (
     <main className="min-h-screen bg-off-white flex items-center justify-center px-4 py-16">
@@ -77,7 +82,18 @@ export default async function ConfirmedPage({ params, searchParams }: Props) {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
               </svg>
-              <span>{event.location}</span>
+              {locationUrl ? (
+                <a
+                  href={locationUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline hover:text-charcoal transition-colors"
+                >
+                  {event.location}
+                </a>
+              ) : (
+                <span>{event.location}</span>
+              )}
             </div>
           </div>
         </div>
