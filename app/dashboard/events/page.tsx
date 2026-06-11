@@ -13,7 +13,7 @@ export default async function EventsPage() {
   if (!user) redirect("/login");
 
   const community = await getCommunityForHost(supabase, user.id);
-  if (!community) redirect("/onboarding");
+  if (!community) redirect("/complete-profile");
 
   const events = await getAllEventsWithStats(supabase, community.id);
   const upcoming = events.filter((e) => !e.isPast);

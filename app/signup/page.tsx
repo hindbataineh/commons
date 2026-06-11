@@ -5,29 +5,50 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 
-export default function LoginPage() {
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL ?? "https://commons-khaki.vercel.app";
+
+export default function SignupPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
+
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters");
+      return;
+    }
+    if (password !== confirm) {
+      setError("Passwords do not match");
+      return;
+    }
+
     setLoading(true);
-
     const supabase = createClient();
-    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error: signUpError } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { emailRedirectTo: `${BASE_URL}/auth/callback` },
+    });
 
-    if (signInError) {
-      setError("Incorrect email or password");
+    if (signUpError) {
+      setError(signUpError.message);
       setLoading(false);
       return;
     }
 
-    router.push("/dashboard");
+    if (data.user) {
+      sessionStorage.setItem("signup_email", email);
+    }
+
+    router.push("/complete-profile");
   }
 
   return (
@@ -37,7 +58,6 @@ export default function LoginPage() {
         <div>
           <span className="font-display text-2xl text-cream">Commons</span>
         </div>
-
         <div className="mt-16 md:mt-0">
           <h1 className="font-display text-4xl md:text-5xl font-medium text-cream leading-tight mb-5">
             Run your community<br className="hidden md:block" /> in one dashboard
@@ -62,7 +82,6 @@ export default function LoginPage() {
             ))}
           </ul>
         </div>
-
         <div className="mt-12 md:mt-0">
           <p className="text-muted text-xs">© {new Date().getFullYear()} Commons</p>
         </div>
@@ -71,11 +90,11 @@ export default function LoginPage() {
       {/* Right auth panel */}
       <div className="bg-cream flex items-center justify-center px-8 py-14 md:w-1/2 md:min-h-screen">
         <div className="w-full max-w-sm">
-          <h2 className="text-2xl font-semibold text-charcoal mb-1">Sign in</h2>
+          <h2 className="text-2xl font-semibold text-charcoal mb-1">Create your account</h2>
           <p className="text-sm text-muted mb-8">
-            Don&rsquo;t have an account?{" "}
-            <Link href="/signup" className="text-charcoal underline hover:text-terracotta transition-colors">
-              Create one
+            Already have one?{" "}
+            <Link href="/login" className="text-charcoal underline hover:text-terracotta transition-colors">
+              Sign in
             </Link>
           </p>
 
@@ -95,25 +114,40 @@ export default function LoginPage() {
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <div className="flex items-center justify-between">
-                <label className="text-sm font-medium text-charcoal" htmlFor="password">Password</label>
-                <Link href="/forgot-password" className="text-xs text-muted hover:text-charcoal transition-colors">
-                  Forgot password?
-                </Link>
-              </div>
+              <label className="text-sm font-medium text-charcoal" htmlFor="password">Password</label>
               <div className="relative">
                 <input
                   id="password"
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Your password"
+                  placeholder="Min. 8 characters"
                   required
-                  autoComplete="current-password"
+                  minLength={8}
+                  autoComplete="new-password"
                   className="w-full rounded-lg border border-sand bg-white px-4 py-2.5 pr-10 text-sm text-charcoal placeholder:text-muted/50 focus:outline-none focus:border-charcoal focus:ring-1 focus:ring-charcoal/20 transition-colors"
                 />
                 <button type="button" onClick={() => setShowPassword((v) => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-charcoal transition-colors">
                   {showPassword ? <EyeOff /> : <Eye />}
+                </button>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label className="text-sm font-medium text-charcoal" htmlFor="confirm">Confirm password</label>
+              <div className="relative">
+                <input
+                  id="confirm"
+                  type={showConfirm ? "text" : "password"}
+                  value={confirm}
+                  onChange={(e) => setConfirm(e.target.value)}
+                  placeholder="Repeat your password"
+                  required
+                  autoComplete="new-password"
+                  className="w-full rounded-lg border border-sand bg-white px-4 py-2.5 pr-10 text-sm text-charcoal placeholder:text-muted/50 focus:outline-none focus:border-charcoal focus:ring-1 focus:ring-charcoal/20 transition-colors"
+                />
+                <button type="button" onClick={() => setShowConfirm((v) => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-charcoal transition-colors">
+                  {showConfirm ? <EyeOff /> : <Eye />}
                 </button>
               </div>
             </div>
@@ -127,7 +161,7 @@ export default function LoginPage() {
               disabled={loading}
               className="w-full bg-charcoal text-cream rounded-lg px-5 py-3 text-sm font-medium hover:bg-charcoal/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-2"
             >
-              {loading ? "Signing in…" : "Sign in"}
+              {loading ? "Creating account…" : "Create account"}
             </button>
           </form>
         </div>

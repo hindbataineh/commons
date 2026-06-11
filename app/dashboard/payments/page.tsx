@@ -11,7 +11,7 @@ export default async function PaymentsPage() {
   if (!user) redirect("/login");
 
   const community = await getCommunityForHost(supabase, user.id);
-  if (!community) redirect("/onboarding");
+  if (!community) redirect("/complete-profile");
 
   const { transactions, stats } = await getPaymentsData(supabase, community.id);
 

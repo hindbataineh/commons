@@ -12,9 +12,9 @@ export default async function DashboardPage() {
   if (!user) redirect("/login");
 
   const data = await getDashboardOverview(supabase, user.id);
-  if (!data) redirect("/onboarding");
+  if (!data) redirect("/complete-profile");
 
-  const { community, stats, quietMembersCount, nextEvents, recentMembers } = data;
+  const { community, stats, quietMembersCount, nextEvents, recentMembers, totalEvents } = data;
 
   return (
     <div className="p-8 max-w-5xl">
@@ -22,6 +22,22 @@ export default async function DashboardPage() {
         <h1 className="text-2xl font-semibold text-charcoal">Dashboard</h1>
         <p className="text-sm text-muted mt-1">{community.name}</p>
       </div>
+
+      {/* Welcome state — shown when no events have been created yet */}
+      {totalEvents === 0 && (
+        <div className="mb-8 bg-white border border-sand rounded-xl px-8 py-12 text-center">
+          <h2 className="text-xl font-semibold text-charcoal mb-2">Welcome to Commons</h2>
+          <p className="text-sm text-muted mb-6 max-w-xs mx-auto">
+            Your community is set up. Create your first event to get your booking link.
+          </p>
+          <Link
+            href="/dashboard/events/new"
+            className="inline-block bg-terracotta text-white text-sm font-medium px-6 py-3 rounded-lg hover:bg-terracotta/90 transition-colors"
+          >
+            + Create your first event
+          </Link>
+        </div>
+      )}
 
       {/* Alert banner */}
       {quietMembersCount > 0 && (

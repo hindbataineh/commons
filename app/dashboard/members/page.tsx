@@ -24,7 +24,7 @@ export default async function MembersPage({ searchParams }: Props) {
   if (!user) redirect("/login");
 
   const community = await getCommunityForHost(supabase, user.id);
-  if (!community) redirect("/onboarding");
+  if (!community) redirect("/complete-profile");
 
   const [members, lapsedMembers] = await Promise.all([
     getAllMembers(supabase, community.id),

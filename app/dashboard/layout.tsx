@@ -16,7 +16,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
     getCommunityForHost(supabase, user.id),
   ]);
 
-  if (!community) redirect("/onboarding");
+  if (!community) redirect("/complete-profile");
 
   return (
     <div className="flex min-h-screen bg-cream">

@@ -31,15 +31,43 @@ export async function middleware(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
 
-  if (!user && (pathname.startsWith("/dashboard") || pathname.startsWith("/onboarding"))) {
+  function redirect(path: string) {
     const url = request.nextUrl.clone();
-    url.pathname = "/login";
+    url.pathname = path;
     return NextResponse.redirect(url);
+  }
+
+  const isAuthenticated = !!user;
+  const isVerified = !!user?.email_confirmed_at;
+
+  // Dashboard requires authenticated + email verified
+  if (pathname.startsWith("/dashboard")) {
+    if (!isAuthenticated) return redirect("/login");
+    if (!isVerified) return redirect("/verify-email");
+  }
+
+  // Profile completion and verification require authentication
+  if (pathname === "/complete-profile" || pathname === "/verify-email") {
+    if (!isAuthenticated) return redirect("/login");
+  }
+
+  // Public auth pages: redirect away if already signed in and verified
+  const publicAuthPaths = ["/login", "/signup", "/forgot-password", "/reset-password"];
+  if (publicAuthPaths.includes(pathname)) {
+    if (isAuthenticated && isVerified) return redirect("/dashboard");
   }
 
   return supabaseResponse;
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/onboarding/:path*"],
+  matcher: [
+    "/dashboard/:path*",
+    "/complete-profile",
+    "/verify-email",
+    "/login",
+    "/signup",
+    "/forgot-password",
+    "/reset-password",
+  ],
 };

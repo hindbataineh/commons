@@ -12,7 +12,7 @@ export default async function AlertsPage() {
   if (!user) redirect("/login");
 
   const community = await getCommunityForHost(supabase, user.id);
-  if (!community) redirect("/onboarding");
+  if (!community) redirect("/complete-profile");
 
   const { quietMembers, newMembers, waitlistEvents } = await getAlertsData(supabase, community.id);
 

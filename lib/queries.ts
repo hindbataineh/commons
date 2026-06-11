@@ -112,6 +112,7 @@ export async function getDashboardOverview(supabase: Client, hostId: string) {
     quietMembersCount,
     nextEvents,
     recentMembers,
+    totalEvents: allEvents.length,
   };
 }
 

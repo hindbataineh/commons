@@ -16,7 +16,7 @@ export default async function EventAttendeesPage({ params }: Props) {
   if (!user) redirect("/login");
 
   const community = await getCommunityForHost(supabase, user.id);
-  if (!community) redirect("/onboarding");
+  if (!community) redirect("/complete-profile");
 
   const svc = createServiceClient();
 
