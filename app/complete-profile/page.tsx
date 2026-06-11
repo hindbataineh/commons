@@ -54,8 +54,7 @@ export default function CompleteProfilePage() {
     console.log("[profile] email from params:", email);
 
     if (!uid || !email) {
-      console.log("[profile] no session data found, redirecting to signup");
-      window.location.href = "/signup";
+      setError("Redirecting to signup because: " + JSON.stringify({ uid, email, hasName: !!name }));
       return;
     }
 
