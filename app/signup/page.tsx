@@ -52,9 +52,9 @@ export default function SignupPage() {
       return;
     }
 
-    sessionStorage.setItem("pending_user_id", data.user.id);
-    sessionStorage.setItem("pending_user_email", email);
-    window.location.href = "/complete-profile";
+    // Pass identity via URL params — more reliable than sessionStorage
+    // across full-page navigations when there is no active session
+    window.location.href = `/complete-profile?uid=${encodeURIComponent(data.user.id)}&email=${encodeURIComponent(email)}`;
   }
 
   return (

@@ -34,6 +34,7 @@ export default function CompleteProfilePage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [pendingUserId, setPendingUserId] = useState("");
+  const [pendingEmail, setPendingEmail] = useState("");
 
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
@@ -45,12 +46,21 @@ export default function CompleteProfilePage() {
   const [description, setDescription] = useState("");
 
   useEffect(() => {
-    const userId = sessionStorage.getItem("pending_user_id");
-    if (!userId) {
+    const params = new URLSearchParams(window.location.search);
+    const uid = params.get("uid");
+    const email = params.get("email");
+
+    console.log("[profile] uid from params:", uid);
+    console.log("[profile] email from params:", email);
+
+    if (!uid || !email) {
+      console.log("[profile] no session data found, redirecting to signup");
       window.location.href = "/signup";
       return;
     }
-    setPendingUserId(userId);
+
+    setPendingUserId(uid);
+    setPendingEmail(email);
   }, []);
 
   function handleNameChange(val: string) {
@@ -87,8 +97,6 @@ export default function CompleteProfilePage() {
       normalisedWebsite = "https://" + normalisedWebsite;
     }
 
-    const pendingEmail = sessionStorage.getItem("pending_user_email") ?? "";
-
     const res = await fetch("/api/setup-community", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -114,10 +122,8 @@ export default function CompleteProfilePage() {
       return;
     }
 
-    // Clear pending signup data — email is kept for /verify-email display
-    sessionStorage.removeItem("pending_user_id");
+    // Store email for /verify-email display, then navigate
     sessionStorage.setItem("signup_email", pendingEmail);
-
     window.location.href = "/verify-email";
   }
 
