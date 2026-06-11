@@ -59,8 +59,8 @@ export default function CompleteProfilePage() {
       setError("Please fill in name and location.");
       return;
     }
-    if (!description) {
-      setError("Please add a description for your community.");
+    if (description.length < 50) {
+      setError("Please write at least 50 characters in the description.");
       return;
     }
     if (!instagram) {
@@ -74,6 +74,12 @@ export default function CompleteProfilePage() {
 
     setLoading(true);
 
+    // Normalise website: prepend https:// if no protocol is present
+    let normalisedWebsite = website.trim();
+    if (normalisedWebsite && !/^https?:\/\//i.test(normalisedWebsite)) {
+      normalisedWebsite = "https://" + normalisedWebsite;
+    }
+
     const res = await fetch("/api/complete-profile", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -85,7 +91,7 @@ export default function CompleteProfilePage() {
         location,
         description,
         instagram_handle: instagram,
-        website,
+        website: normalisedWebsite,
       }),
     });
 
@@ -182,9 +188,9 @@ export default function CompleteProfilePage() {
               Website <span className="text-muted font-normal">(optional)</span>
             </label>
             <input
-              type="url"
+              type="text"
               className={baseInput}
-              placeholder="https://yourwebsite.com"
+              placeholder="www.yourwebsite.com"
               value={website}
               onChange={(e) => setWebsite(e.target.value)}
             />
@@ -195,11 +201,14 @@ export default function CompleteProfilePage() {
             <textarea
               className={`${baseInput} resize-none`}
               rows={3}
+              maxLength={300}
               placeholder="Tell people what your community is about…"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              required
             />
+            <p className={`text-xs text-right ${description.length < 50 || description.length > 300 ? "text-red-500" : "text-muted"}`}>
+              {description.length} / 300 characters
+            </p>
           </div>
 
           {/* Slug preview */}
