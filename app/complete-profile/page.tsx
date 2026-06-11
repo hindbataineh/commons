@@ -68,8 +68,9 @@ export default function CompleteProfilePage() {
     setSlug(generateSlug(val));
   }
 
-  async function handleSubmit(e?: React.FormEvent) {
-    e?.preventDefault();
+  async function handleSubmit(e: React.FormEvent) {
+    console.log("[profile] submit fired");
+    e.preventDefault();
     console.log("[profile] handleSubmit called", { pendingUserId, pendingEmail });
     setError("");
 
@@ -144,8 +145,10 @@ export default function CompleteProfilePage() {
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-5">
           <div className="flex flex-col gap-1.5">
-            <label className={baseLabel}>Club / community name</label>
+            <label htmlFor="community-name" className={baseLabel}>Club / community name</label>
             <input
+              id="community-name"
+              name="community-name"
               className={baseInput}
               placeholder="Kite Beach Run Club"
               value={name}
@@ -154,8 +157,10 @@ export default function CompleteProfilePage() {
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className={baseLabel}>Type of community</label>
+            <label htmlFor="community-type" className={baseLabel}>Type of community</label>
             <select
+              id="community-type"
+              name="community-type"
               className={baseInput}
               value={type}
               onChange={(e) => { setType(e.target.value); setCustomType(""); }}
@@ -166,6 +171,8 @@ export default function CompleteProfilePage() {
             </select>
             {type === "other" && (
               <input
+                id="custom-type"
+                name="custom-type"
                 className={baseInput}
                 placeholder="e.g. Cycling club"
                 value={customType}
@@ -175,8 +182,10 @@ export default function CompleteProfilePage() {
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className={baseLabel}>Location</label>
+            <label htmlFor="location" className={baseLabel}>Location</label>
             <input
+              id="location"
+              name="location"
               className={baseInput}
               placeholder="Dubai, UAE"
               value={location}
@@ -185,8 +194,10 @@ export default function CompleteProfilePage() {
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className={baseLabel}>Instagram handle</label>
+            <label htmlFor="instagram" className={baseLabel}>Instagram handle</label>
             <input
+              id="instagram"
+              name="instagram"
               className={baseInput}
               placeholder="@yourcommunity"
               value={instagram}
@@ -195,10 +206,12 @@ export default function CompleteProfilePage() {
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className={baseLabel}>
+            <label htmlFor="website" className={baseLabel}>
               Website <span className="text-muted font-normal">(optional)</span>
             </label>
             <input
+              id="website"
+              name="website"
               type="text"
               className={baseInput}
               placeholder="www.yourwebsite.com"
@@ -208,8 +221,10 @@ export default function CompleteProfilePage() {
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className={baseLabel}>Description</label>
+            <label htmlFor="description" className={baseLabel}>Description</label>
             <textarea
+              id="description"
+              name="description"
               className={`${baseInput} resize-none`}
               rows={3}
               maxLength={300}
@@ -230,8 +245,10 @@ export default function CompleteProfilePage() {
                 commons.ae/<span className="text-terracotta">{slug}</span>
               </p>
               <div className="flex flex-col gap-1 mt-2">
-                <label className="text-xs text-muted">Edit URL</label>
+                <label htmlFor="slug" className="text-xs text-muted">Edit URL</label>
                 <input
+                  id="slug"
+                  name="slug"
                   className="text-sm border border-sand rounded-md px-2 py-1 bg-white text-charcoal focus:outline-none focus:border-charcoal"
                   value={slug}
                   onChange={(e) => setSlug(e.target.value)}
@@ -241,8 +258,7 @@ export default function CompleteProfilePage() {
           )}
 
           <button
-            type="button"
-            onClick={() => { console.log("[profile] button clicked"); handleSubmit(); }}
+            type="submit"
             disabled={loading}
             className="w-full bg-charcoal text-cream rounded-lg px-5 py-3 text-sm font-medium hover:bg-charcoal/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-2"
           >
