@@ -46,8 +46,10 @@ export async function middleware(request: NextRequest) {
     if (!isVerified) return redirect("/verify-email");
   }
 
-  // Profile completion and verification require authentication
-  if (pathname === "/complete-profile" || pathname === "/verify-email") {
+  // Verify-email requires authentication; complete-profile is intentionally
+  // public so a freshly signed-up user is never blocked before their session
+  // cookie is fully written (the API route still enforces auth server-side)
+  if (pathname === "/verify-email") {
     if (!isAuthenticated) return redirect("/login");
   }
 
@@ -63,7 +65,6 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     "/dashboard/:path*",
-    "/complete-profile",
     "/verify-email",
     "/login",
     "/signup",

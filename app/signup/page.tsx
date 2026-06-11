@@ -1,14 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL ?? "https://commons-khaki.vercel.app";
 
 export default function SignupPage() {
-  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
@@ -31,12 +29,16 @@ export default function SignupPage() {
     }
 
     setLoading(true);
+    console.log('[signup] form submitted');
+
     const supabase = createClient();
+    console.log('[signup] calling supabase.auth.signUp');
     const { data, error: signUpError } = await supabase.auth.signUp({
       email,
       password,
       options: { emailRedirectTo: `${BASE_URL}/auth/callback` },
     });
+    console.log('[signup] result:', { user: data?.user?.id, session: !!data?.session, error: signUpError?.message });
 
     if (signUpError) {
       setError(signUpError.message);
@@ -44,11 +46,15 @@ export default function SignupPage() {
       return;
     }
 
-    if (data.user) {
-      sessionStorage.setItem("signup_email", email);
+    if (!data.user) {
+      setError("Could not create account. The email may already be registered.");
+      setLoading(false);
+      return;
     }
 
-    router.push("/complete-profile");
+    sessionStorage.setItem("signup_email", email);
+    // Hard navigation ensures session cookies are sent on the next request
+    window.location.href = "/complete-profile";
   }
 
   return (
