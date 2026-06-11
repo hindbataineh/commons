@@ -68,8 +68,9 @@ export default function CompleteProfilePage() {
     setSlug(generateSlug(val));
   }
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  async function handleSubmit(e?: React.FormEvent) {
+    e?.preventDefault();
+    console.log("[profile] handleSubmit called", { pendingUserId, pendingEmail });
     setError("");
 
     if (!name || !location || !slug) {
@@ -149,7 +150,6 @@ export default function CompleteProfilePage() {
               placeholder="Kite Beach Run Club"
               value={name}
               onChange={(e) => handleNameChange(e.target.value)}
-              required
             />
           </div>
 
@@ -181,7 +181,6 @@ export default function CompleteProfilePage() {
               placeholder="Dubai, UAE"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
-              required
             />
           </div>
 
@@ -192,7 +191,6 @@ export default function CompleteProfilePage() {
               placeholder="@yourcommunity"
               value={instagram}
               onChange={(e) => setInstagram(e.target.value)}
-              required
             />
           </div>
 
@@ -243,8 +241,9 @@ export default function CompleteProfilePage() {
           )}
 
           <button
-            type="submit"
-            disabled={loading || !pendingUserId}
+            type="button"
+            onClick={() => { console.log("[profile] button clicked"); handleSubmit(); }}
+            disabled={loading}
             className="w-full bg-charcoal text-cream rounded-lg px-5 py-3 text-sm font-medium hover:bg-charcoal/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-2"
           >
             {loading ? "Creating your community…" : "Create my community"}
