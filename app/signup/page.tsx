@@ -52,8 +52,8 @@ export default function SignupPage() {
       return;
     }
 
-    sessionStorage.setItem("signup_email", email);
-    // Hard navigation ensures session cookies are sent on the next request
+    sessionStorage.setItem("pending_user_id", data.user.id);
+    sessionStorage.setItem("pending_user_email", email);
     window.location.href = "/complete-profile";
   }
 

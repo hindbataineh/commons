@@ -10,15 +10,16 @@ export default function VerifyEmailPage() {
   const [resending, setResending] = useState(false);
 
   useEffect(() => {
-    // Try to get email from session, fall back to sessionStorage
-    const supabase = createClient();
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user?.email) {
-        setEmail(user.email);
-      } else {
-        setEmail(sessionStorage.getItem("signup_email") ?? "");
-      }
-    });
+    const stored = sessionStorage.getItem("signup_email") ?? "";
+    setEmail(stored);
+
+    // Send the verification email as soon as the user lands here
+    if (stored) {
+      const supabase = createClient();
+      supabase.auth.resend({ type: "signup", email: stored }).catch(() => {
+        // Silent — user can retry with the button
+      });
+    }
   }, []);
 
   async function handleResend() {

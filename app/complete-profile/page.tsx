@@ -1,8 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
+import { useEffect, useState } from "react";
 
 const COMMUNITY_TYPES = [
   { value: "run_club", label: "Run club" },
@@ -33,9 +31,9 @@ const baseInput =
 const baseLabel = "text-sm font-medium text-charcoal";
 
 export default function CompleteProfilePage() {
-  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [pendingUserId, setPendingUserId] = useState("");
 
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
@@ -45,6 +43,15 @@ export default function CompleteProfilePage() {
   const [instagram, setInstagram] = useState("");
   const [website, setWebsite] = useState("");
   const [description, setDescription] = useState("");
+
+  useEffect(() => {
+    const userId = sessionStorage.getItem("pending_user_id");
+    if (!userId) {
+      window.location.href = "/signup";
+      return;
+    }
+    setPendingUserId(userId);
+  }, []);
 
   function handleNameChange(val: string) {
     setName(val);
@@ -74,16 +81,20 @@ export default function CompleteProfilePage() {
 
     setLoading(true);
 
-    // Normalise website: prepend https:// if no protocol is present
+    // Normalise website: prepend https:// if no protocol present
     let normalisedWebsite = website.trim();
     if (normalisedWebsite && !/^https?:\/\//i.test(normalisedWebsite)) {
       normalisedWebsite = "https://" + normalisedWebsite;
     }
 
-    const res = await fetch("/api/complete-profile", {
+    const pendingEmail = sessionStorage.getItem("pending_user_email") ?? "";
+
+    const res = await fetch("/api/setup-community", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
+        user_id: pendingUserId,
+        email: pendingEmail,
         name,
         slug,
         type,
@@ -103,15 +114,11 @@ export default function CompleteProfilePage() {
       return;
     }
 
-    // Trigger verification email now that profile is complete
-    const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user?.email) {
-      await supabase.auth.resend({ type: "signup", email: user.email });
-      sessionStorage.setItem("signup_email", user.email);
-    }
+    // Clear pending signup data — email is kept for /verify-email display
+    sessionStorage.removeItem("pending_user_id");
+    sessionStorage.setItem("signup_email", pendingEmail);
 
-    router.push("/verify-email");
+    window.location.href = "/verify-email";
   }
 
   return (
@@ -231,7 +238,7 @@ export default function CompleteProfilePage() {
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || !pendingUserId}
             className="w-full bg-charcoal text-cream rounded-lg px-5 py-3 text-sm font-medium hover:bg-charcoal/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-2"
           >
             {loading ? "Creating your community…" : "Create my community"}
