@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { createBrowserClient } from "@supabase/ssr";
 
 interface NavItem {
   href: string;
@@ -65,6 +66,15 @@ interface Props {
 export default function Sidebar({ hostName, communityName }: Props) {
   const pathname = usePathname();
 
+  async function handleLogout() {
+    const supabase = createBrowserClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    );
+    await supabase.auth.signOut();
+    window.location.href = "/login";
+  }
+
   function isActive(href: string) {
     if (href === "/dashboard") return pathname === "/dashboard";
     return pathname.startsWith(href);
@@ -96,6 +106,15 @@ export default function Sidebar({ hostName, communityName }: Props) {
       <div className="px-5 py-5 border-t border-white/10">
         <p className="text-sm text-cream truncate">{communityName}</p>
         <p className="text-xs text-muted mt-0.5 truncate">{hostName}</p>
+        <button
+          onClick={handleLogout}
+          className="flex items-center gap-1.5 text-xs text-muted hover:text-sand transition-colors mt-3"
+        >
+          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
+          </svg>
+          Log out
+        </button>
       </div>
     </aside>
   );
