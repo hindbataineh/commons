@@ -1,6 +1,16 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+const publicRoutes = [
+  "/login",
+  "/signup",
+  "/complete-profile",
+  "/verify-email",
+  "/forgot-password",
+  "/reset-password",
+  "/auth/callback",
+];
+
 export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
 
@@ -46,16 +56,8 @@ export async function middleware(request: NextRequest) {
     if (!isVerified) return redirect("/verify-email");
   }
 
-  // Verify-email requires authentication; complete-profile is intentionally
-  // public so a freshly signed-up user is never blocked before their session
-  // cookie is fully written (the API route still enforces auth server-side)
-  if (pathname === "/verify-email") {
-    if (!isAuthenticated) return redirect("/login");
-  }
-
-  // Public auth pages: redirect away if already signed in and verified
-  const publicAuthPaths = ["/login", "/signup", "/forgot-password", "/reset-password"];
-  if (publicAuthPaths.includes(pathname)) {
+  // Redirect already-verified users away from public auth pages
+  if (publicRoutes.includes(pathname)) {
     if (isAuthenticated && isVerified) return redirect("/dashboard");
   }
 
@@ -65,10 +67,12 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     "/dashboard/:path*",
-    "/verify-email",
     "/login",
     "/signup",
+    "/complete-profile",
+    "/verify-email",
     "/forgot-password",
     "/reset-password",
+    "/auth/callback",
   ],
 };
