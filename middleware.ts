@@ -1,6 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+// Routes that are always public — no auth required
 const publicRoutes = [
   "/login",
   "/signup",
@@ -9,6 +10,16 @@ const publicRoutes = [
   "/forgot-password",
   "/reset-password",
   "/auth/callback",
+];
+
+// Public routes where a fully-authenticated user should be sent to dashboard
+// instead. /complete-profile and /auth/callback are excluded so they are
+// never interrupted mid-flow.
+const redirectIfVerified = [
+  "/login",
+  "/signup",
+  "/forgot-password",
+  "/reset-password",
 ];
 
 export async function middleware(request: NextRequest) {
@@ -50,14 +61,14 @@ export async function middleware(request: NextRequest) {
   const isAuthenticated = !!user;
   const isVerified = !!user?.email_confirmed_at;
 
-  // Dashboard requires authenticated + email verified
+  // Dashboard only requires a valid session — no email-verified check here
   if (pathname.startsWith("/dashboard")) {
     if (!isAuthenticated) return redirect("/login");
-    if (!isVerified) return redirect("/verify-email");
   }
 
-  // Redirect already-verified users away from public auth pages
-  if (publicRoutes.includes(pathname)) {
+  // Redirect already-verified users away from login/signup etc.
+  // Never redirect from /complete-profile or /auth/callback.
+  if (redirectIfVerified.includes(pathname)) {
     if (isAuthenticated && isVerified) return redirect("/dashboard");
   }
 
