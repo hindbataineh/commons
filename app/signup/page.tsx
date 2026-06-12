@@ -36,7 +36,7 @@ export default function SignupPage() {
     const { data, error: signUpError } = await supabase.auth.signUp({
       email,
       password,
-      options: { emailRedirectTo: undefined, data: {} },
+      options: { emailRedirectTo: "https://commons-khaki.vercel.app/auth/callback" },
     });
     console.log('[signup] result:', { user: data?.user?.id, session: !!data?.session, error: signUpError?.message });
 
