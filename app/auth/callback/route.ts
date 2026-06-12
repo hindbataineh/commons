@@ -11,11 +11,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(`${origin}/login?error=missing_code`);
   }
 
-  // Build the redirect response first so cookies can be attached to it directly.
-  // Using next/headers cookies() here doesn't work — cookies set that way are
-  // not included in an explicit NextResponse.redirect() object.
-  const redirectUrl = next ? `${origin}${next}` : `${origin}/dashboard`;
-  const response = NextResponse.redirect(redirectUrl);
+  // Collect cookies during exchangeCodeForSession so we can apply them to
+  // whichever redirect response we create after determining the destination.
+  const pendingCookies: Array<{ name: string; value: string; options: Record<string, unknown> }> = [];
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -28,7 +26,7 @@ export async function GET(request: NextRequest) {
         setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value, options }) => {
             request.cookies.set(name, value);
-            response.cookies.set(name, value, options);
+            pendingCookies.push({ name, value, options: options as Record<string, unknown> });
           });
         },
       },
@@ -41,15 +39,39 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(`${origin}/login?error=auth_failed`);
   }
 
-  // Email verification flow — mark onboarding complete (skip for password reset)
-  if (!next) {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      const svc = createServiceClient();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await (svc.from("hosts") as any).update({ onboarding_complete: true }).eq("id", user.id);
+  // Password reset or other ?next= flows — redirect there directly
+  if (next) {
+    const response = NextResponse.redirect(`${origin}${next}`);
+    pendingCookies.forEach(({ name, value, options }) =>
+      response.cookies.set(name, value, options)
+    );
+    return response;
+  }
+
+  // Email verification flow — check if host has completed onboarding
+  const { data: { user } } = await supabase.auth.getUser();
+
+  let redirectPath = "/login?error=no_user";
+
+  if (user) {
+    const svc = createServiceClient();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: host } = await (svc.from("hosts") as any)
+      .select("onboarding_complete")
+      .eq("id", user.id)
+      .single();
+
+    if (host?.onboarding_complete) {
+      redirectPath = "/dashboard";
+    } else {
+      // Host row missing or onboarding incomplete — send back to complete-profile
+      redirectPath = `/complete-profile?uid=${encodeURIComponent(user.id)}&email=${encodeURIComponent(user.email ?? "")}`;
     }
   }
 
+  const response = NextResponse.redirect(`${origin}${redirectPath}`);
+  pendingCookies.forEach(({ name, value, options }) =>
+    response.cookies.set(name, value, options)
+  );
   return response;
 }

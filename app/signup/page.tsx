@@ -36,7 +36,7 @@ export default function SignupPage() {
     const { data, error: signUpError } = await supabase.auth.signUp({
       email,
       password,
-      options: { emailRedirectTo: `${BASE_URL}/auth/callback` },
+      options: { emailRedirectTo: undefined, data: {} },
     });
     console.log('[signup] result:', { user: data?.user?.id, session: !!data?.session, error: signUpError?.message });
 

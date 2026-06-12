@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
     id: user_id,
     email,
     name,
-    onboarding_complete: false,
+    onboarding_complete: true,
   });
 
   if (hostError) {
