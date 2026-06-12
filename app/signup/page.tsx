@@ -52,9 +52,10 @@ export default function SignupPage() {
       return;
     }
 
-    // Pass identity via URL params — more reliable than sessionStorage
-    // across full-page navigations when there is no active session
-    window.location.href = `/complete-profile?uid=${encodeURIComponent(data.user.id)}&email=${encodeURIComponent(email)}`;
+    // Store email so /verify-email can display it, then wait for the
+    // Supabase verification email — auth/callback handles the rest
+    sessionStorage.setItem("signup_email", email);
+    window.location.href = "/verify-email";
   }
 
   return (
