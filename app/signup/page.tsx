@@ -32,28 +32,30 @@ export default function SignupPage() {
     console.log('[signup] form submitted');
 
     const supabase = createClient();
-    console.log('[signup] calling supabase.auth.signUp');
-    const { data, error: signUpError } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: { emailRedirectTo: "https://commons-khaki.vercel.app/auth/callback" },
+      options: {
+        emailRedirectTo: "https://commons-khaki.vercel.app/auth/callback",
+      },
     });
-    console.log('[signup] result:', { user: data?.user?.id, session: !!data?.session, error: signUpError?.message });
 
-    if (signUpError) {
-      setError(signUpError.message);
+    console.log("[signup] data:", JSON.stringify(data));
+    console.log("[signup] error:", JSON.stringify(error));
+
+    if (error) {
+      setError(error.message);
       setLoading(false);
       return;
     }
 
     if (!data.user) {
-      setError("Could not create account. The email may already be registered.");
+      setError("Account could not be created. Please try again.");
       setLoading(false);
       return;
     }
 
-    // Store email so /verify-email can display it, then wait for the
-    // Supabase verification email — auth/callback handles the rest
+    // Success - redirect to verify email
     sessionStorage.setItem("signup_email", email);
     window.location.href = "/verify-email";
   }
