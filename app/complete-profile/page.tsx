@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 const COMMUNITY_TYPES = [
   { value: "run_club", label: "Run club" },
@@ -31,13 +31,16 @@ const baseInput =
 const baseLabel = "text-sm font-medium text-charcoal";
 
 export default function CompleteProfilePage() {
-  const [ready, setReady] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [pendingUserId, setPendingUserId] = useState("");
-  const [pendingEmail, setPendingEmail] = useState("");
+  // Read uid and email directly from URL on first render —
+  // no useEffect, no loading state, no async checks.
+  const params =
+    typeof window !== "undefined"
+      ? new URLSearchParams(window.location.search)
+      : null;
+  const uid = params?.get("uid") || "";
+  const email = params?.get("email") || "";
 
-  const [name, setName] = useState("");
+  const [communityName, setCommunityName] = useState("");
   const [slug, setSlug] = useState("");
   const [type, setType] = useState("run_club");
   const [customType, setCustomType] = useState("");
@@ -45,127 +48,82 @@ export default function CompleteProfilePage() {
   const [instagram, setInstagram] = useState("");
   const [website, setWebsite] = useState("");
   const [description, setDescription] = useState("");
-
-  useEffect(() => {
-    console.log("[profile] useEffect started");
-
-    // Hard timeout: if anything prevents the form from showing within 5s,
-    // force it visible so the user is never permanently stuck.
-    const timeout = setTimeout(() => {
-      console.log("[profile] timeout reached, forcing form display");
-      setReady(true);
-    }, 5000);
-
-    const init = async () => {
-      try {
-        console.log("[profile] reading params");
-        const params = new URLSearchParams(window.location.search);
-        const uidParam = params.get("uid");
-        const emailParam = params.get("email");
-        console.log("[profile] uid:", uidParam, "email:", emailParam);
-
-        if (!uidParam || !emailParam) {
-          console.log("[profile] missing params, redirecting to signup");
-          clearTimeout(timeout);
-          window.location.href = "/signup";
-          return;
-        }
-
-        setPendingUserId(uidParam);
-        setPendingEmail(emailParam);
-        clearTimeout(timeout);
-        setReady(true);
-        console.log("[profile] ready set to true, form should render");
-      } catch (err) {
-        console.error("[profile] init error:", err);
-        clearTimeout(timeout);
-        setReady(true);
-      }
-    };
-
-    init();
-
-    return () => clearTimeout(timeout);
-  }, []);
+  const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   function handleNameChange(val: string) {
-    setName(val);
+    setCommunityName(val);
     setSlug(generateSlug(val));
   }
 
-  async function handleSubmit(e: React.FormEvent) {
-    console.log("[profile] submit fired");
+  // If no uid/email, show a simple message — no automatic redirect.
+  if (!uid || !email) {
+    return (
+      <main className="min-h-screen bg-cream flex flex-col items-center justify-center gap-4 px-4">
+        <span className="font-display text-2xl text-charcoal">Commons</span>
+        <p className="text-sm text-muted text-center">
+          Something went wrong with your signup link.
+        </p>
+        <a
+          href="/signup"
+          className="bg-charcoal text-cream rounded-lg px-5 py-2.5 text-sm font-medium hover:bg-charcoal/90 transition-colors"
+        >
+          Go to signup
+        </a>
+      </main>
+    );
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
-    console.log("[profile] validation check:", {
-      communityName: name, type, location, instagram,
-      description: description?.length, customType,
-    });
-
-    if (!name || !location) {
-      setError("Please fill in your community name and location.");
-      return;
-    }
-    if (!instagram) {
-      setError("Please enter your Instagram handle.");
-      return;
-    }
-    if (description.length < 50) {
-      setError("Please write at least 50 characters in the description.");
+    if (!communityName || !location || !instagram || description.length < 50) {
+      setError(
+        "Please fill in all required fields (description needs 50+ characters)."
+      );
       return;
     }
     if (type === "other" && !customType) {
-      setError("Please describe your community type.");
+      setError("Please tell us your community type.");
       return;
     }
 
-    setLoading(true);
-
-    // Normalise website: prepend https:// if no protocol present
     let normalisedWebsite = website.trim();
     if (normalisedWebsite && !/^https?:\/\//i.test(normalisedWebsite)) {
       normalisedWebsite = "https://" + normalisedWebsite;
     }
 
-    const res = await fetch("/api/setup-community", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        user_id: pendingUserId,
-        email: pendingEmail,
-        name,
-        slug,
-        type,
-        custom_type: customType,
-        location,
-        description,
-        instagram_handle: instagram,
-        website: normalisedWebsite,
-      }),
-    });
-
-    const json = await res.json();
-
-    if (!res.ok) {
-      setError(json.error ?? "Something went wrong. Please try again.");
-      setLoading(false);
-      return;
+    setSubmitting(true);
+    try {
+      const res = await fetch("/api/setup-community", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user_id: uid,
+          email,
+          name: communityName,
+          slug,
+          type,
+          custom_type: customType,
+          location,
+          description,
+          instagram_handle: instagram,
+          website: normalisedWebsite,
+        }),
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        setError(json.error || "Something went wrong. Please try again.");
+        setSubmitting(false);
+        return;
+      }
+      window.location.href = "/dashboard";
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Network error");
+      setSubmitting(false);
     }
-
-    window.location.href = "/dashboard";
-  }
-
-  if (!ready) {
-    return (
-      <main className="min-h-screen bg-cream flex flex-col items-center justify-center gap-4">
-        <span className="text-sm text-muted">Setting up your profile…</span>
-        <a href="/signup" className="text-xs text-muted underline">
-          Start over
-        </a>
-      </main>
-    );
-  }
+  };
 
   return (
     <main className="min-h-screen bg-cream px-4 py-12">
@@ -183,28 +141,37 @@ export default function CompleteProfilePage() {
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-5">
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="community-name" className={baseLabel}>Club / community name</label>
+            <label htmlFor="community-name" className={baseLabel}>
+              Club / community name
+            </label>
             <input
               id="community-name"
               name="community-name"
               className={baseInput}
               placeholder="Kite Beach Run Club"
-              value={name}
+              value={communityName}
               onChange={(e) => handleNameChange(e.target.value)}
             />
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="community-type" className={baseLabel}>Type of community</label>
+            <label htmlFor="community-type" className={baseLabel}>
+              Type of community
+            </label>
             <select
               id="community-type"
               name="community-type"
               className={baseInput}
               value={type}
-              onChange={(e) => { setType(e.target.value); setCustomType(""); }}
+              onChange={(e) => {
+                setType(e.target.value);
+                setCustomType("");
+              }}
             >
               {COMMUNITY_TYPES.map((t) => (
-                <option key={t.value} value={t.value}>{t.label}</option>
+                <option key={t.value} value={t.value}>
+                  {t.label}
+                </option>
               ))}
             </select>
             {type === "other" && (
@@ -220,7 +187,9 @@ export default function CompleteProfilePage() {
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="location" className={baseLabel}>Location</label>
+            <label htmlFor="location" className={baseLabel}>
+              Location
+            </label>
             <input
               id="location"
               name="location"
@@ -232,7 +201,9 @@ export default function CompleteProfilePage() {
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="instagram" className={baseLabel}>Instagram handle</label>
+            <label htmlFor="instagram" className={baseLabel}>
+              Instagram handle
+            </label>
             <input
               id="instagram"
               name="instagram"
@@ -245,7 +216,8 @@ export default function CompleteProfilePage() {
 
           <div className="flex flex-col gap-1.5">
             <label htmlFor="website" className={baseLabel}>
-              Website <span className="text-muted font-normal">(optional)</span>
+              Website{" "}
+              <span className="text-muted font-normal">(optional)</span>
             </label>
             <input
               id="website"
@@ -259,7 +231,9 @@ export default function CompleteProfilePage() {
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="description" className={baseLabel}>Description</label>
+            <label htmlFor="description" className={baseLabel}>
+              Description
+            </label>
             <textarea
               id="description"
               name="description"
@@ -270,12 +244,17 @@ export default function CompleteProfilePage() {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
             />
-            <p className={`text-xs text-right ${description.length < 50 || description.length > 300 ? "text-red-500" : "text-muted"}`}>
+            <p
+              className={`text-xs text-right ${
+                description.length < 50 || description.length > 300
+                  ? "text-red-500"
+                  : "text-muted"
+              }`}
+            >
               {description.length} / 300 characters
             </p>
           </div>
 
-          {/* Slug preview */}
           {slug && (
             <div className="bg-charcoal/5 rounded-lg px-4 py-3">
               <p className="text-xs text-muted mb-1">Your booking URL</p>
@@ -283,7 +262,9 @@ export default function CompleteProfilePage() {
                 commons.ae/<span className="text-terracotta">{slug}</span>
               </p>
               <div className="flex flex-col gap-1 mt-2">
-                <label htmlFor="slug" className="text-xs text-muted">Edit URL</label>
+                <label htmlFor="slug" className="text-xs text-muted">
+                  Edit URL
+                </label>
                 <input
                   id="slug"
                   name="slug"
@@ -297,10 +278,10 @@ export default function CompleteProfilePage() {
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={submitting}
             className="w-full bg-charcoal text-cream rounded-lg px-5 py-3 text-sm font-medium hover:bg-charcoal/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-2"
           >
-            {loading ? "Creating your community…" : "Create my community"}
+            {submitting ? "Creating your community…" : "Create my community"}
           </button>
         </form>
       </div>
