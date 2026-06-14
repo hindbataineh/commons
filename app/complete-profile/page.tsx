@@ -54,7 +54,7 @@ export default function CompleteProfilePage() {
     console.log("[profile] email from params:", email);
 
     if (!uid || !email) {
-      setError("Redirecting to signup because: " + JSON.stringify({ uid, email, hasName: !!name }));
+      window.location.href = "/signup";
       return;
     }
 
@@ -70,19 +70,23 @@ export default function CompleteProfilePage() {
   async function handleSubmit(e: React.FormEvent) {
     console.log("[profile] submit fired");
     e.preventDefault();
-    console.log("[profile] handleSubmit called", { pendingUserId, pendingEmail });
     setError("");
 
-    if (!name || !location || !slug) {
-      setError("Please fill in name and location.");
-      return;
-    }
-    if (description.length < 50) {
-      setError("Please write at least 50 characters in the description.");
+    console.log("[profile] validation check:", {
+      communityName: name, type, location, instagram,
+      description: description?.length, customType,
+    });
+
+    if (!name || !location) {
+      setError("Please fill in your community name and location.");
       return;
     }
     if (!instagram) {
       setError("Please enter your Instagram handle.");
+      return;
+    }
+    if (description.length < 50) {
+      setError("Please write at least 50 characters in the description.");
       return;
     }
     if (type === "other" && !customType) {
@@ -123,9 +127,7 @@ export default function CompleteProfilePage() {
       return;
     }
 
-    // Store email for /verify-email display, then navigate
-    sessionStorage.setItem("signup_email", pendingEmail);
-    window.location.href = "/verify-email";
+    window.location.href = "/dashboard";
   }
 
   return (
