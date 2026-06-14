@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 const COMMUNITY_TYPES = [
   { value: "run_club", label: "Run club" },
@@ -46,29 +46,29 @@ export default function CompleteProfilePage() {
   const [website, setWebsite] = useState("");
   const [description, setDescription] = useState("");
 
-  // Guard so the redirect/init logic only ever runs once, even if the
-  // component remounts due to client-router replays after a hard nav.
-  const paramsChecked = useRef(false);
-
   useEffect(() => {
-    if (paramsChecked.current) return;
-    paramsChecked.current = true;
+    console.log("[profile] useEffect started");
 
-    const params = new URLSearchParams(window.location.search);
-    const uid = params.get("uid");
-    const email = params.get("email");
+    const init = async () => {
+      console.log("[profile] reading params");
+      const params = new URLSearchParams(window.location.search);
+      const uidParam = params.get("uid");
+      const emailParam = params.get("email");
+      console.log("[profile] uid:", uidParam, "email:", emailParam);
 
-    console.log("[profile] uid from params:", uid);
-    console.log("[profile] email from params:", email);
+      if (!uidParam || !emailParam) {
+        console.log("[profile] missing params, redirecting to signup");
+        window.location.href = "/signup";
+        return;
+      }
 
-    if (!uid || !email) {
-      window.location.href = "/signup";
-      return;
-    }
+      setPendingUserId(uidParam);
+      setPendingEmail(emailParam);
+      setReady(true);
+      console.log("[profile] ready set to true, form should render");
+    };
 
-    setPendingUserId(uid);
-    setPendingEmail(email);
-    setReady(true);
+    init();
   }, []);
 
   function handleNameChange(val: string) {
@@ -141,8 +141,11 @@ export default function CompleteProfilePage() {
 
   if (!ready) {
     return (
-      <main className="min-h-screen bg-cream flex items-center justify-center">
-        <span className="text-sm text-muted">Loading…</span>
+      <main className="min-h-screen bg-cream flex flex-col items-center justify-center gap-4">
+        <span className="text-sm text-muted">Setting up your profile…</span>
+        <a href="/signup" className="text-xs text-muted underline">
+          Start over
+        </a>
       </main>
     );
   }
