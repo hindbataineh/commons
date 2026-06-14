@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const COMMUNITY_TYPES = [
   { value: "run_club", label: "Run club" },
@@ -31,6 +31,7 @@ const baseInput =
 const baseLabel = "text-sm font-medium text-charcoal";
 
 export default function CompleteProfilePage() {
+  const [ready, setReady] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [pendingUserId, setPendingUserId] = useState("");
@@ -45,7 +46,14 @@ export default function CompleteProfilePage() {
   const [website, setWebsite] = useState("");
   const [description, setDescription] = useState("");
 
+  // Guard so the redirect/init logic only ever runs once, even if the
+  // component remounts due to client-router replays after a hard nav.
+  const paramsChecked = useRef(false);
+
   useEffect(() => {
+    if (paramsChecked.current) return;
+    paramsChecked.current = true;
+
     const params = new URLSearchParams(window.location.search);
     const uid = params.get("uid");
     const email = params.get("email");
@@ -60,6 +68,7 @@ export default function CompleteProfilePage() {
 
     setPendingUserId(uid);
     setPendingEmail(email);
+    setReady(true);
   }, []);
 
   function handleNameChange(val: string) {
@@ -128,6 +137,14 @@ export default function CompleteProfilePage() {
     }
 
     window.location.href = "/dashboard";
+  }
+
+  if (!ready) {
+    return (
+      <main className="min-h-screen bg-cream flex items-center justify-center">
+        <span className="text-sm text-muted">Loading…</span>
+      </main>
+    );
   }
 
   return (
