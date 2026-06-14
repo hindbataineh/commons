@@ -49,26 +49,43 @@ export default function CompleteProfilePage() {
   useEffect(() => {
     console.log("[profile] useEffect started");
 
-    const init = async () => {
-      console.log("[profile] reading params");
-      const params = new URLSearchParams(window.location.search);
-      const uidParam = params.get("uid");
-      const emailParam = params.get("email");
-      console.log("[profile] uid:", uidParam, "email:", emailParam);
-
-      if (!uidParam || !emailParam) {
-        console.log("[profile] missing params, redirecting to signup");
-        window.location.href = "/signup";
-        return;
-      }
-
-      setPendingUserId(uidParam);
-      setPendingEmail(emailParam);
+    // Hard timeout: if anything prevents the form from showing within 5s,
+    // force it visible so the user is never permanently stuck.
+    const timeout = setTimeout(() => {
+      console.log("[profile] timeout reached, forcing form display");
       setReady(true);
-      console.log("[profile] ready set to true, form should render");
+    }, 5000);
+
+    const init = async () => {
+      try {
+        console.log("[profile] reading params");
+        const params = new URLSearchParams(window.location.search);
+        const uidParam = params.get("uid");
+        const emailParam = params.get("email");
+        console.log("[profile] uid:", uidParam, "email:", emailParam);
+
+        if (!uidParam || !emailParam) {
+          console.log("[profile] missing params, redirecting to signup");
+          clearTimeout(timeout);
+          window.location.href = "/signup";
+          return;
+        }
+
+        setPendingUserId(uidParam);
+        setPendingEmail(emailParam);
+        clearTimeout(timeout);
+        setReady(true);
+        console.log("[profile] ready set to true, form should render");
+      } catch (err) {
+        console.error("[profile] init error:", err);
+        clearTimeout(timeout);
+        setReady(true);
+      }
     };
 
     init();
+
+    return () => clearTimeout(timeout);
   }, []);
 
   function handleNameChange(val: string) {
