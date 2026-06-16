@@ -2,6 +2,13 @@
 
 import { useState } from "react";
 
+// Read URL params once at module evaluation time so they are never lost
+// across re-renders when Next.js strips search params from the URL.
+function getParam(key: string): string {
+  if (typeof window === "undefined") return "";
+  return new URLSearchParams(window.location.search).get(key) || "";
+}
+
 const COMMUNITY_TYPES = [
   { value: "run_club", label: "Run club" },
   { value: "fitness", label: "Fitness & gym" },
@@ -31,14 +38,10 @@ const baseInput =
 const baseLabel = "text-sm font-medium text-charcoal";
 
 export default function CompleteProfilePage() {
-  // Read uid and email directly from URL on first render —
-  // no useEffect, no loading state, no async checks.
-  const params =
-    typeof window !== "undefined"
-      ? new URLSearchParams(window.location.search)
-      : null;
-  const uid = params?.get("uid") || "";
-  const email = params?.get("email") || "";
+  // Captured in state so re-renders never lose the values even if
+  // Next.js strips search params from the URL after initial load.
+  const [uid] = useState(() => getParam("uid"));
+  const [email] = useState(() => getParam("email"));
 
   const [communityName, setCommunityName] = useState("");
   const [slug, setSlug] = useState("");
@@ -76,6 +79,8 @@ export default function CompleteProfilePage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("[submit] uid:", uid, "email:", email);
+    console.log("[submit] form:", { communityName, type, location, instagram, description: description.length });
     setError("");
 
     if (!communityName || !location || !instagram || description.length < 50) {
