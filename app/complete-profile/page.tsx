@@ -1,13 +1,6 @@
 "use client";
 
-import { useState } from "react";
-
-// Read URL params once at module evaluation time so they are never lost
-// across re-renders when Next.js strips search params from the URL.
-function getParam(key: string): string {
-  if (typeof window === "undefined") return "";
-  return new URLSearchParams(window.location.search).get(key) || "";
-}
+import { useState, useEffect } from "react";
 
 const COMMUNITY_TYPES = [
   { value: "run_club", label: "Run club" },
@@ -38,10 +31,9 @@ const baseInput =
 const baseLabel = "text-sm font-medium text-charcoal";
 
 export default function CompleteProfilePage() {
-  // Captured in state so re-renders never lose the values even if
-  // Next.js strips search params from the URL after initial load.
-  const [uid] = useState(() => getParam("uid"));
-  const [email] = useState(() => getParam("email"));
+  const [uid, setUid] = useState("");
+  const [email, setEmail] = useState("");
+  const [ready, setReady] = useState(false);
 
   const [communityName, setCommunityName] = useState("");
   const [slug, setSlug] = useState("");
@@ -54,12 +46,21 @@ export default function CompleteProfilePage() {
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  function handleNameChange(val: string) {
-    setCommunityName(val);
-    setSlug(generateSlug(val));
-  }
+  useEffect(() => {
+    // Only runs on client — no SSR window access, no hydration mismatch
+    const params = new URLSearchParams(window.location.search);
+    const uidParam = params.get("uid") || "";
+    const emailParam = params.get("email") || "";
+    console.log("[profile] uid:", uidParam, "email:", emailParam);
+    setUid(uidParam);
+    setEmail(emailParam);
+    setReady(true);
+  }, []);
 
-  // If no uid/email, show a simple message — no automatic redirect.
+  // Render nothing until client has read params — avoids SSR/client mismatch
+  if (!ready) return null;
+
+  // Params were missing in the URL
   if (!uid || !email) {
     return (
       <main className="min-h-screen bg-cream flex flex-col items-center justify-center gap-4 px-4">
@@ -77,6 +78,11 @@ export default function CompleteProfilePage() {
     );
   }
 
+  function handleNameChange(val: string) {
+    setCommunityName(val);
+    setSlug(generateSlug(val));
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log("[submit] uid:", uid, "email:", email);
@@ -84,9 +90,7 @@ export default function CompleteProfilePage() {
     setError("");
 
     if (!communityName || !location || !instagram || description.length < 50) {
-      setError(
-        "Please fill in all required fields (description needs 50+ characters)."
-      );
+      setError("Please fill in all required fields. Description needs at least 50 characters.");
       return;
     }
     if (type === "other" && !customType) {
@@ -118,6 +122,7 @@ export default function CompleteProfilePage() {
         }),
       });
       const json = await res.json();
+      console.log("[submit] response:", json);
       if (!res.ok) {
         setError(json.error || "Something went wrong. Please try again.");
         setSubmitting(false);
@@ -125,7 +130,8 @@ export default function CompleteProfilePage() {
       }
       window.location.href = "/dashboard";
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Network error");
+      console.error("[submit] error:", err);
+      setError(err instanceof Error ? err.message : "Network error. Please try again.");
       setSubmitting(false);
     }
   };
