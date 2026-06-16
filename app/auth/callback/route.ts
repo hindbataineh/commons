@@ -3,16 +3,16 @@ import { createServerClient } from "@supabase/ssr";
 import { createServiceClient } from "@/lib/supabase/server";
 
 export async function GET(request: NextRequest) {
-  const { searchParams, origin } = new URL(request.url);
+  const { searchParams } = new URL(request.url);
   const code = searchParams.get("code");
   const next = searchParams.get("next");
 
   if (!code) {
-    return NextResponse.redirect(`${origin}/login?error=missing_code`);
+    return NextResponse.redirect(new URL("/login?error=missing_code", request.url));
   }
 
-  // Collect cookies during exchangeCodeForSession so we can apply them to
-  // whichever redirect response we create after determining the destination.
+  // Collect cookies set during exchangeCodeForSession so we can attach
+  // them to whichever redirect response we ultimately return.
   const pendingCookies: Array<{ name: string; value: string; options: Record<string, unknown> }> = [];
 
   const supabase = createServerClient(
@@ -36,40 +36,49 @@ export async function GET(request: NextRequest) {
   const { error } = await supabase.auth.exchangeCodeForSession(code);
 
   if (error) {
-    return NextResponse.redirect(`${origin}/login?error=auth_failed`);
+    return NextResponse.redirect(new URL("/login?error=auth_failed", request.url));
   }
 
   // Password reset or other ?next= flows — redirect there directly
   if (next) {
-    const response = NextResponse.redirect(`${origin}${next}`);
+    const response = NextResponse.redirect(new URL(next, request.url));
     pendingCookies.forEach(({ name, value, options }) =>
       response.cookies.set(name, value, options)
     );
     return response;
   }
 
-  // Email verification flow — check if host has completed onboarding
-  const { data: { user } } = await supabase.auth.getUser();
+  // Use getSession() — reads locally from the cookies just set above,
+  // more reliable than getUser() which makes a round-trip to Supabase.
+  const { data: { session } } = await supabase.auth.getSession();
 
-  let redirectPath = "/login?error=no_user";
-
-  if (user) {
-    const svc = createServiceClient();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: host } = await (svc.from("hosts") as any)
-      .select("onboarding_complete")
-      .eq("id", user.id)
-      .single();
-
-    if (host?.onboarding_complete) {
-      redirectPath = "/dashboard";
-    } else {
-      // Host row missing or onboarding incomplete — send back to complete-profile
-      redirectPath = `/complete-profile?uid=${encodeURIComponent(user.id)}&email=${encodeURIComponent(user.email ?? "")}`;
-    }
+  if (!session) {
+    return NextResponse.redirect(new URL("/login?error=no_session", request.url));
   }
 
-  const response = NextResponse.redirect(`${origin}${redirectPath}`);
+  const userId = session.user.id;
+  const userEmail = session.user.email || "";
+
+  // Check if host already exists and has completed onboarding
+  const svc = createServiceClient();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: host } = await (svc.from("hosts") as any)
+    .select("onboarding_complete")
+    .eq("id", userId)
+    .single();
+
+  let destination: URL;
+
+  if (host?.onboarding_complete) {
+    destination = new URL("/dashboard", request.url);
+  } else {
+    // No host row or onboarding incomplete — go to complete-profile with params
+    destination = new URL("/complete-profile", request.url);
+    destination.searchParams.set("uid", userId);
+    destination.searchParams.set("email", userEmail);
+  }
+
+  const response = NextResponse.redirect(destination);
   pendingCookies.forEach(({ name, value, options }) =>
     response.cookies.set(name, value, options)
   );
