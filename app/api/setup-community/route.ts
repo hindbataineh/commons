@@ -16,7 +16,10 @@ export async function POST(req: NextRequest) {
     website,
   } = body;
 
+  console.log('[setup] received:', { user_id, email, name, slug, type, location, instagram_handle, description: description?.length });
+
   if (!user_id || !email || !name || !slug || !type || !location || !description || !instagram_handle) {
+    console.log('[setup] missing fields check:', { user_id: !!user_id, email: !!email, name: !!name, slug: !!slug, type: !!type, location: !!location, description: !!description, instagram_handle: !!instagram_handle });
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
   }
 
@@ -30,6 +33,7 @@ export async function POST(req: NextRequest) {
     onboarding_complete: true,
   });
 
+  console.log('[setup] host upsert error:', hostError);
   if (hostError) {
     return NextResponse.json({ error: hostError.message }, { status: 500 });
   }
@@ -47,6 +51,7 @@ export async function POST(req: NextRequest) {
     website: website || null,
   });
 
+  console.log('[setup] community insert error:', communityError);
   if (communityError) {
     if (communityError.code === "23505" || communityError.message.includes("unique")) {
       return NextResponse.json(
@@ -57,5 +62,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: communityError.message }, { status: 500 });
   }
 
+  console.log('[setup] success for user:', user_id);
   return NextResponse.json({ success: true });
 }

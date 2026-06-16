@@ -16,19 +16,30 @@ export async function GET(request: Request) {
   }
 
   const cookieStore = cookies()
+
+  // Collect cookies written during exchangeCodeForSession so we can
+  // attach them to the redirect response — this is what gives the browser
+  // a valid Supabase session after the redirect.
+  const pendingCookies: Array<{ name: string; value: string; options: Record<string, unknown> }> = []
+
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        get: (n) => cookieStore.get(n)?.value,
-        set: () => {},
-        remove: () => {},
+        get: (name) => cookieStore.get(name)?.value,
+        set: (name, value, options) => {
+          pendingCookies.push({ name, value, options: options as Record<string, unknown> })
+        },
+        remove: (name, options) => {
+          pendingCookies.push({ name, value: '', options: options as Record<string, unknown> })
+        },
       },
     }
   )
 
   const { data: { session }, error } = await supabase.auth.exchangeCodeForSession(code)
+  console.log('[callback] pendingCookies count:', pendingCookies.length)
 
   if (error || !session) {
     console.error('[callback] exchangeCodeForSession error:', error)
@@ -41,8 +52,10 @@ export async function GET(request: Request) {
 
   // Password reset or other ?next= flows — redirect there directly
   if (next) {
-    console.log('[callback] next param present, redirecting to:', next)
-    return NextResponse.redirect(`${origin}${next}`)
+    console.log('[callback] next param, redirecting to:', next)
+    const response = NextResponse.redirect(`${origin}${next}`)
+    pendingCookies.forEach(({ name, value, options }) => response.cookies.set(name, value, options))
+    return response
   }
 
   const serviceSupabase = createServerClient(
@@ -67,13 +80,16 @@ export async function GET(request: Request) {
 
   if (host?.onboarding_complete === true) {
     console.log('[callback] onboarding complete, redirecting to dashboard')
-    return NextResponse.redirect(`${origin}/dashboard`)
+    const response = NextResponse.redirect(`${origin}/dashboard`)
+    pendingCookies.forEach(({ name, value, options }) => response.cookies.set(name, value, options))
+    return response
   }
 
   const completeProfileUrl = `${origin}/complete-profile?uid=${userId}&email=${encodeURIComponent(userEmail)}`
   console.log('[callback] redirecting to:', completeProfileUrl)
 
   const response = NextResponse.redirect(completeProfileUrl)
+  pendingCookies.forEach(({ name, value, options }) => response.cookies.set(name, value, options))
   response.cookies.set('pending_uid', userId, { httpOnly: false, maxAge: 3600, path: '/' })
   response.cookies.set('pending_email', userEmail, { httpOnly: false, maxAge: 3600, path: '/' })
   return response

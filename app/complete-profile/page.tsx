@@ -141,6 +141,7 @@ export default function CompleteProfilePage() {
         setSubmitting(false);
         return;
       }
+      console.log('[submit] success, redirecting to dashboard');
       window.location.href = "/dashboard";
     } catch (err: unknown) {
       console.error("[submit] error:", err);
