@@ -47,10 +47,23 @@ export default function CompleteProfilePage() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    // Only runs on client — no SSR window access, no hydration mismatch
     const params = new URLSearchParams(window.location.search);
-    const uidParam = params.get("uid") || "";
-    const emailParam = params.get("email") || "";
+    let uidParam = params.get("uid") || "";
+    let emailParam = params.get("email") || "";
+
+    // Fallback: read from cookies if URL params are empty
+    if (!uidParam || !emailParam) {
+      const getCookie = (name: string) => {
+        const value = document.cookie
+          .split("; ")
+          .find((row) => row.startsWith(name + "="))
+          ?.split("=")[1];
+        return value ? decodeURIComponent(value) : "";
+      };
+      uidParam = uidParam || getCookie("pending_uid");
+      emailParam = emailParam || getCookie("pending_email");
+    }
+
     console.log("[profile] uid:", uidParam, "email:", emailParam);
     setUid(uidParam);
     setEmail(emailParam);

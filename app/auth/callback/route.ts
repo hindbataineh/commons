@@ -72,5 +72,9 @@ export async function GET(request: Request) {
 
   const completeProfileUrl = `${origin}/complete-profile?uid=${userId}&email=${encodeURIComponent(userEmail)}`
   console.log('[callback] redirecting to:', completeProfileUrl)
-  return NextResponse.redirect(completeProfileUrl)
+
+  const response = NextResponse.redirect(completeProfileUrl)
+  response.cookies.set('pending_uid', userId, { httpOnly: false, maxAge: 3600, path: '/' })
+  response.cookies.set('pending_email', userEmail, { httpOnly: false, maxAge: 3600, path: '/' })
+  return response
 }
