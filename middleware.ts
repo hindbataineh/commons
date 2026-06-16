@@ -12,14 +12,11 @@ const publicRoutes = [
   "/auth/callback",
 ];
 
-// Public routes where a fully-authenticated user should be sent to dashboard
-// instead. /complete-profile and /auth/callback are excluded so they are
-// never interrupted mid-flow.
+// Only /login and /signup bounce verified users to /dashboard.
+// /forgot-password and /reset-password remain accessible even when signed in.
 const redirectIfVerified = [
   "/login",
   "/signup",
-  "/forgot-password",
-  "/reset-password",
 ];
 
 export async function middleware(request: NextRequest) {
