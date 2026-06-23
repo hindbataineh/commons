@@ -4,7 +4,6 @@ import { useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL ?? "https://commons-khaki.vercel.app";
 
 export default function SignupPage() {
   const [email, setEmail] = useState("");
@@ -35,9 +34,6 @@ export default function SignupPage() {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: {
-        emailRedirectTo: "https://commons-khaki.vercel.app/auth/callback",
-      },
     });
 
     console.log("[signup] data:", JSON.stringify(data));
@@ -55,9 +51,10 @@ export default function SignupPage() {
       return;
     }
 
-    // Success - redirect to verify email
-    sessionStorage.setItem("signup_email", email);
-    window.location.href = "/verify-email";
+    // Success - redirect directly to complete-profile (email confirmation disabled)
+    const uid = data.user.id;
+    const userEmail = data.user.email ?? email;
+    window.location.href = `/complete-profile?uid=${uid}&email=${encodeURIComponent(userEmail)}`;
   }
 
   return (
