@@ -84,6 +84,44 @@ export default async function CommunityPage({ params }: Props) {
             </svg>
             <span>{community.location}</span>
           </div>
+          {(community.instagram_handle || community.website) && (
+            <div className="flex items-center gap-4 mb-4">
+              {community.instagram_handle && (
+                <a
+                  href={`https://instagram.com/${community.instagram_handle}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 text-sm text-muted hover:text-charcoal transition-colors"
+                >
+                  <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5" strokeLinecap="round" strokeLinejoin="round" />
+                    <circle cx="12" cy="12" r="4" strokeLinecap="round" strokeLinejoin="round" />
+                    <circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" stroke="none" />
+                  </svg>
+                  <span>@{community.instagram_handle}</span>
+                </a>
+              )}
+              {community.website && (() => {
+                const raw = community.website.trim();
+                const href = /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
+                const display = href.replace(/^https?:\/\//i, "").replace(/\/+$/, "");
+                return (
+                  <a
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1.5 text-sm text-muted hover:text-charcoal transition-colors"
+                  >
+                    <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9 9 0 100-18 9 9 0 000 18z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M3.6 9h16.8M3.6 15h16.8M12 3a13.5 13.5 0 010 18M12 3a13.5 13.5 0 000 18" />
+                    </svg>
+                    <span>{display}</span>
+                  </a>
+                );
+              })()}
+            </div>
+          )}
           {community.description && (
             <p className="text-sm text-muted leading-relaxed">{community.description}</p>
           )}
