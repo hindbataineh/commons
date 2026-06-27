@@ -48,6 +48,7 @@ export type Database = {
           location: string;
           instagram_handle: string | null;
           contact_email: string | null;
+          website: string | null;
         };
         Insert: {
           id?: string;
@@ -60,6 +61,7 @@ export type Database = {
           location: string;
           instagram_handle?: string | null;
           contact_email?: string | null;
+          website?: string | null;
         };
         Update: {
           id?: string;
@@ -72,6 +74,7 @@ export type Database = {
           location?: string;
           instagram_handle?: string | null;
           contact_email?: string | null;
+          website?: string | null;
         };
         Relationships: Rel[];
       };
