@@ -17,6 +17,15 @@ const COMMUNITY_TYPES = [
   { value: "other", label: "Other" },
 ];
 
+function cleanInstagramHandle(input: string): string {
+  if (!input) return "";
+  let h = input.trim();
+  h = h.replace(/^https?:\/\/(www\.)?instagram\.com\//i, "");
+  h = h.replace(/^@+/, "").replace(/\/+$/, "");
+  h = h.split(/[/?#]/)[0];
+  return h;
+}
+
 function generateSlug(name: string) {
   return name
     .toLowerCase()
@@ -111,6 +120,8 @@ export default function CompleteProfilePage() {
       return;
     }
 
+    const cleanedInstagram = cleanInstagramHandle(instagram);
+
     let normalisedWebsite = website.trim();
     if (normalisedWebsite && !/^https?:\/\//i.test(normalisedWebsite)) {
       normalisedWebsite = "https://" + normalisedWebsite;
@@ -130,7 +141,7 @@ export default function CompleteProfilePage() {
           custom_type: customType,
           location,
           description,
-          instagram_handle: instagram,
+          instagram_handle: cleanedInstagram,
           website: normalisedWebsite,
         }),
       });
@@ -229,14 +240,17 @@ export default function CompleteProfilePage() {
             <label htmlFor="instagram" className={baseLabel}>
               Instagram handle
             </label>
-            <input
-              id="instagram"
-              name="instagram"
-              className={baseInput}
-              placeholder="@yourcommunity"
-              value={instagram}
-              onChange={(e) => setInstagram(e.target.value)}
-            />
+            <div className="flex items-center rounded-lg border border-sand bg-white px-4 py-2.5 focus-within:border-charcoal focus-within:ring-1 focus-within:ring-charcoal/20 transition-colors">
+              <span className="text-sm text-stone-400 mr-1 select-none">@</span>
+              <input
+                id="instagram"
+                name="instagram"
+                className="flex-1 text-sm text-charcoal bg-transparent outline-none placeholder:text-muted/50"
+                placeholder="yourcommunity"
+                value={instagram}
+                onChange={(e) => setInstagram(e.target.value)}
+              />
+            </div>
           </div>
 
           <div className="flex flex-col gap-1.5">
