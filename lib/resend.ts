@@ -19,8 +19,10 @@ export async function sendBookingConfirmation({
   eventLocation: string;
   communityName: string;
 }) {
-  return resend.emails.send({
-    from: "Commons <onboarding@resend.dev>",
+  console.log('[email] attempting send to:', to)
+  console.log('[email] from:', 'Commons <hello@join-commons.com>')
+  const result = await resend.emails.send({
+    from: 'Commons <hello@join-commons.com>',
     to,
     subject: `You're booked — ${eventName}`,
     html: `
@@ -36,5 +38,7 @@ export async function sendBookingConfirmation({
         <p style="font-size: 13px; color: #7A7569;">You'll receive a reminder email before the event.</p>
       </div>
     `,
-  });
+  })
+  console.log('[email] resend result:', JSON.stringify(result))
+  return result
 }
