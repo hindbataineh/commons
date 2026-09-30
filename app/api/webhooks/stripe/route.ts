@@ -30,6 +30,7 @@ export async function POST(req: NextRequest) {
     member_email,
     member_whatsapp,
     community_id,
+    booking_ref,
   } = meta;
 
   if (!event_id || !member_name || !member_email) {
@@ -74,6 +75,7 @@ export async function POST(req: NextRequest) {
     payment_status: "paid",
     stripe_payment_intent_id: session.payment_intent as string,
     amount_paid: session.amount_total ?? 0,
+    booking_ref: booking_ref || null,
   });
 
   // Upsert member
@@ -119,6 +121,7 @@ export async function POST(req: NextRequest) {
       eventTime: formatTime(eventRow.event_time),
       eventLocation: eventRow.location,
       communityName: community.name,
+      bookingRef: booking_ref || undefined,
     }).catch(console.error);
   }
 

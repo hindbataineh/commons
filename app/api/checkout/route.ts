@@ -62,6 +62,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Event is full" }, { status: 400 });
     }
 
+    const bookingRef = "CM" + Date.now().toString(36).toUpperCase().slice(-6);
+
     const origin =
       req.headers.get("origin") ||
       (req.headers.get("x-forwarded-host")
@@ -93,8 +95,9 @@ export async function POST(req: NextRequest) {
         community_id: community.id,
         host_slug: community.slug,
         event_slug: event.slug,
+        booking_ref: bookingRef,
       },
-      success_url: `${origin}/${community.slug}/${event.slug}/confirmed?name=${encodeURIComponent(member_name)}`,
+      success_url: `${origin}/${community.slug}/${event.slug}/confirmed?name=${encodeURIComponent(member_name)}&email=${encodeURIComponent(member_email)}&ref=${bookingRef}`,
       cancel_url: `${origin}/${community.slug}/${event.slug}`,
     });
 
@@ -109,6 +112,7 @@ export async function POST(req: NextRequest) {
       payment_status: "pending",
       stripe_payment_intent_id: session.id,
       amount_paid: 0,
+      booking_ref: bookingRef,
     });
 
     if (bookingError && bookingError.code !== "23505") {

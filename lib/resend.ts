@@ -39,9 +39,10 @@ export async function sendBookingConfirmation({
         <div style="background: #F7F4EF; border-radius: 8px; padding: 20px; margin-bottom: 32px;">
           <p style="margin: 0 0 8px;"><strong>${eventName}</strong></p>
           <p style="margin: 0 0 4px; color: #7A7569; font-size: 14px;">${eventDate} at ${eventTime}</p>
-          <p style="margin: 0; color: #7A7569; font-size: 14px;">${eventLocation}</p>
+            <p style="margin: 0; color: #7A7569; font-size: 14px;">${eventLocation}</p>
         </div>
-        <p style="font-size: 13px; color: #7A7569;">You'll receive a reminder email before the event.</p>
+        ${bookingRef ? `<p style="font-size: 13px; color: #7A7569; margin-bottom: 24px;">Booking ref: <strong style="color: #1A1714; font-family: monospace;">${bookingRef}</strong></p>` : ''}
+        <p style="font-size: 13px; color: #7A7569;">A confirmation has been sent to ${to}.</p>
         <p style="font-size: 11px; color: #999; margin-top: 32px;">Commons · Dubai, UAE · <a href="mailto:hello@join-commons.com" style="color: #999;">hello@join-commons.com</a></p>
       </div>
     `,

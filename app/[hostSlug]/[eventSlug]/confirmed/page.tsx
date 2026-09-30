@@ -113,12 +113,12 @@ export default async function ConfirmedPage({ params, searchParams }: Props) {
           />
         )}
 
-        {/* Reminder note */}
+        {/* Confirmation note */}
         {!isWaitlisted && (
           <p className="text-sm text-muted mb-8">
             {email
-              ? <>A reminder will be sent to <span className="text-charcoal font-medium">{email}</span></>
-              : "You'll receive a reminder email before the event."}
+              ? <>A confirmation will be sent to <span className="text-charcoal font-medium">{email}</span></>
+              : "A confirmation email will be sent to you."}
           </p>
         )}
 

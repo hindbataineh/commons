@@ -148,6 +148,9 @@ export type Database = {
           stripe_payment_intent_id: string | null;
           amount_paid: number;
           reminder_sent: boolean;
+          booking_ref: string | null;
+          gender: string | null;
+          birth_year: number | null;
         };
         Insert: {
           id?: string;
@@ -161,6 +164,9 @@ export type Database = {
           stripe_payment_intent_id?: string | null;
           amount_paid?: number;
           reminder_sent?: boolean;
+          booking_ref?: string | null;
+          gender?: string | null;
+          birth_year?: number | null;
         };
         Update: {
           id?: string;
@@ -174,6 +180,9 @@ export type Database = {
           stripe_payment_intent_id?: string | null;
           amount_paid?: number;
           reminder_sent?: boolean;
+          booking_ref?: string | null;
+          gender?: string | null;
+          birth_year?: number | null;
         };
         Relationships: Rel[];
       };

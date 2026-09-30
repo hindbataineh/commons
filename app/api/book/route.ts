@@ -114,6 +114,7 @@ export async function POST(req: NextRequest) {
           eventTime: formatTime(event.event_time),
           eventLocation: event.location,
           communityName: community.name,
+          bookingRef,
         });
         console.log('[email] result:', JSON.stringify(emailResult));
       } catch (emailError) {
