@@ -4,7 +4,6 @@ import { useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 
-
 export default function SignupPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -57,18 +56,20 @@ export default function SignupPage() {
     window.location.href = `/complete-profile?uid=${uid}&email=${encodeURIComponent(userEmail)}`;
   }
 
+  const inputCls = "w-full rounded-lg border border-[#D8D2C6] bg-white px-4 py-2.5 text-[15px] text-carbon placeholder:text-stone/50 focus:outline-none focus:border-carbon focus:ring-1 focus:ring-carbon/20 transition-colors";
+
   return (
     <main className="min-h-screen flex flex-col md:flex-row">
       {/* Left brand panel */}
-      <div className="bg-charcoal flex flex-col justify-between px-10 py-12 md:w-1/2 md:min-h-screen">
+      <div className="bg-carbon flex flex-col justify-between px-10 py-12 md:w-1/2 md:min-h-screen">
         <div>
-          <span className="font-display text-2xl text-cream">Commons</span>
+          <span className="font-semibold text-lg text-cream tracking-tight">Commons</span>
         </div>
         <div className="mt-16 md:mt-0">
-          <h1 className="font-display text-4xl md:text-5xl font-medium text-cream leading-tight mb-5">
+          <h1 className="text-4xl md:text-5xl font-semibold text-cream leading-tight mb-5 tracking-tight">
             Run your community<br className="hidden md:block" /> in one dashboard
           </h1>
-          <p className="text-sand/80 text-base leading-relaxed mb-10 max-w-sm">
+          <p className="text-cream/60 text-[15px] leading-relaxed mb-10 max-w-sm">
             Bookings, members, payments and insights — everything you need to manage and grow your community in one place.
           </p>
           <ul className="flex flex-col gap-4">
@@ -78,35 +79,35 @@ export default function SignupPage() {
               "Built for how you run communities",
             ].map((point) => (
               <li key={point} className="flex items-start gap-3">
-                <span className="mt-0.5 w-5 h-5 rounded-full bg-terracotta/20 flex items-center justify-center shrink-0">
-                  <svg className="w-3 h-3 text-terracotta" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                <span className="mt-0.5 w-5 h-5 rounded-full bg-gold/20 flex items-center justify-center shrink-0">
+                  <svg className="w-3 h-3 text-gold" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                   </svg>
                 </span>
-                <span className="text-sand/80 text-sm">{point}</span>
+                <span className="text-cream/70 text-sm">{point}</span>
               </li>
             ))}
           </ul>
         </div>
         <div className="mt-12 md:mt-0">
-          <p className="text-muted text-xs">© {new Date().getFullYear()} Commons</p>
+          <p className="text-stone text-xs">© {new Date().getFullYear()} Commons</p>
         </div>
       </div>
 
       {/* Right auth panel */}
-      <div className="bg-cream flex items-center justify-center px-8 py-14 md:w-1/2 md:min-h-screen">
+      <div className="bg-white flex items-center justify-center px-8 py-14 md:w-1/2 md:min-h-screen">
         <div className="w-full max-w-sm">
-          <h2 className="text-2xl font-semibold text-charcoal mb-1">Create your account</h2>
-          <p className="text-sm text-muted mb-8">
+          <h2 className="text-[34px] font-semibold tracking-tight text-carbon mb-1">Create your account</h2>
+          <p className="text-[15px] text-stone mb-8">
             Already have one?{" "}
-            <Link href="/login" className="text-charcoal underline hover:text-terracotta transition-colors">
+            <Link href="/login" className="text-sea-green hover:underline transition-colors">
               Sign in
             </Link>
           </p>
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <div className="flex flex-col gap-1.5">
-              <label className="text-sm font-medium text-charcoal" htmlFor="email">Email address</label>
+              <label className="text-[13px] font-medium text-stone" htmlFor="email">Email address</label>
               <input
                 id="email"
                 type="email"
@@ -115,12 +116,12 @@ export default function SignupPage() {
                 placeholder="you@email.com"
                 required
                 autoComplete="email"
-                className="w-full rounded-lg border border-sand bg-white px-4 py-2.5 text-sm text-charcoal placeholder:text-muted/50 focus:outline-none focus:border-charcoal focus:ring-1 focus:ring-charcoal/20 transition-colors"
+                className={inputCls}
               />
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label className="text-sm font-medium text-charcoal" htmlFor="password">Password</label>
+              <label className="text-[13px] font-medium text-stone" htmlFor="password">Password</label>
               <div className="relative">
                 <input
                   id="password"
@@ -131,16 +132,16 @@ export default function SignupPage() {
                   required
                   minLength={8}
                   autoComplete="new-password"
-                  className="w-full rounded-lg border border-sand bg-white px-4 py-2.5 pr-10 text-sm text-charcoal placeholder:text-muted/50 focus:outline-none focus:border-charcoal focus:ring-1 focus:ring-charcoal/20 transition-colors"
+                  className={`${inputCls} pr-10`}
                 />
-                <button type="button" onClick={() => setShowPassword((v) => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-charcoal transition-colors">
+                <button type="button" onClick={() => setShowPassword((v) => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-stone hover:text-carbon transition-colors">
                   {showPassword ? <EyeOff /> : <Eye />}
                 </button>
               </div>
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label className="text-sm font-medium text-charcoal" htmlFor="confirm">Confirm password</label>
+              <label className="text-[13px] font-medium text-stone" htmlFor="confirm">Confirm password</label>
               <div className="relative">
                 <input
                   id="confirm"
@@ -150,9 +151,9 @@ export default function SignupPage() {
                   placeholder="Repeat your password"
                   required
                   autoComplete="new-password"
-                  className="w-full rounded-lg border border-sand bg-white px-4 py-2.5 pr-10 text-sm text-charcoal placeholder:text-muted/50 focus:outline-none focus:border-charcoal focus:ring-1 focus:ring-charcoal/20 transition-colors"
+                  className={`${inputCls} pr-10`}
                 />
-                <button type="button" onClick={() => setShowConfirm((v) => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-charcoal transition-colors">
+                <button type="button" onClick={() => setShowConfirm((v) => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-stone hover:text-carbon transition-colors">
                   {showConfirm ? <EyeOff /> : <Eye />}
                 </button>
               </div>
@@ -165,7 +166,7 @@ export default function SignupPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-charcoal text-cream rounded-lg px-5 py-3 text-sm font-medium hover:bg-charcoal/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-2"
+              className="w-full bg-carbon text-cream rounded-lg px-5 py-3 text-[16px] font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed mt-2"
             >
               {loading ? "Creating account…" : "Create account"}
             </button>

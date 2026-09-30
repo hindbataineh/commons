@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
-import { DM_Sans, Cormorant_Garamond } from "next/font/google";
+import { Readex_Pro, Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
 
-const dmSans = DM_Sans({
+const readexPro = Readex_Pro({
   subsets: ["latin"],
-  variable: "--font-dm-sans",
+  weight: ["400", "500", "600"],
+  variable: "--font-readex",
   display: "swap",
 });
 
@@ -26,10 +27,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        className={`${dmSans.variable} ${cormorant.variable} font-sans bg-off-white text-charcoal antialiased`}
-      >
+    <html lang="en" className={`${readexPro.variable} ${cormorant.variable}`}>
+      <body className="font-sans bg-linen text-carbon antialiased">
         {children}
       </body>
     </html>

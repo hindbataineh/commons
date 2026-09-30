@@ -18,8 +18,8 @@ export default async function PaymentsPage() {
   return (
     <div className="p-8 max-w-4xl">
       <div className="mb-8">
-        <h1 className="text-2xl font-semibold text-charcoal">Payments</h1>
-        <p className="text-sm text-muted mt-1">{community.name}</p>
+        <h1 className="text-[34px] font-semibold tracking-tight text-carbon">Payments</h1>
+        <p className="text-[15px] text-stone mt-1">{community.name}</p>
       </div>
 
       {/* Stat cards */}
@@ -39,38 +39,38 @@ export default async function PaymentsPage() {
       </div>
 
       {/* Transactions */}
-      <h2 className="text-xs text-muted uppercase tracking-wide mb-4">Transactions</h2>
+      <h2 className="text-[13px] text-stone uppercase tracking-wide mb-4">Transactions</h2>
 
       {transactions.length === 0 ? (
-        <div className="bg-white border border-sand rounded-xl px-6 py-12 text-center">
-          <p className="text-muted text-sm">No transactions yet.</p>
+        <div className="bg-white border border-[#D8D2C6] rounded-xl px-6 py-12 text-center">
+          <p className="text-stone text-[15px]">No transactions yet.</p>
         </div>
       ) : (
-        <div className="bg-white border border-sand rounded-xl overflow-hidden">
+        <div className="bg-white border border-[#D8D2C6] rounded-xl overflow-hidden">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-sand">
-                <th className="text-left px-5 py-3 text-xs text-muted font-medium">Member</th>
-                <th className="text-left px-5 py-3 text-xs text-muted font-medium">Event</th>
-                <th className="text-left px-5 py-3 text-xs text-muted font-medium">Date</th>
-                <th className="text-right px-5 py-3 text-xs text-muted font-medium">Amount</th>
-                <th className="text-left px-5 py-3 text-xs text-muted font-medium">Status</th>
+              <tr className="border-b border-[#D8D2C6]">
+                <th className="text-left px-5 py-3 text-[13px] text-stone font-medium">Member</th>
+                <th className="text-left px-5 py-3 text-[13px] text-stone font-medium">Event</th>
+                <th className="text-left px-5 py-3 text-[13px] text-stone font-medium">Date</th>
+                <th className="text-right px-5 py-3 text-[13px] text-stone font-medium">Amount</th>
+                <th className="text-left px-5 py-3 text-[13px] text-stone font-medium">Status</th>
               </tr>
             </thead>
             <tbody>
               {transactions.map((tx, i) => (
-                <tr key={tx.id} className={i < transactions.length - 1 ? "border-b border-sand/60" : ""}>
+                <tr key={tx.id} className={i < transactions.length - 1 ? "border-b border-[#D8D2C6]/60" : ""}>
                   <td className="px-5 py-3.5">
-                    <p className="font-medium text-charcoal">{tx.memberName}</p>
-                    <p className="text-xs text-muted">{tx.memberEmail}</p>
+                    <p className="font-semibold text-carbon">{tx.memberName}</p>
+                    <p className="text-[13px] text-stone">{tx.memberEmail}</p>
                   </td>
-                  <td className="px-5 py-3.5 text-muted">{tx.eventName}</td>
-                  <td className="px-5 py-3.5 text-muted">
+                  <td className="px-5 py-3.5 text-stone">{tx.eventName}</td>
+                  <td className="px-5 py-3.5 text-stone">
                     {tx.eventDate ? formatShortDate(tx.eventDate) : "—"}
                   </td>
-                  <td className="px-5 py-3.5 text-right font-medium text-charcoal">
+                  <td className="px-5 py-3.5 text-right font-semibold text-carbon">
                     {tx.amount === 0 ? (
-                      <span className="text-muted font-normal">Free</span>
+                      <span className="text-stone font-normal">Free</span>
                     ) : (
                       formatPrice(tx.amount)
                     )}
@@ -90,18 +90,18 @@ export default async function PaymentsPage() {
 
 function StatCard({ label, value }: { label: string; value: string }) {
   return (
-    <div className="bg-white border border-sand rounded-xl px-5 py-5">
-      <p className="text-xs text-muted mb-2">{label}</p>
-      <p className="text-2xl font-semibold text-charcoal">{value}</p>
+    <div className="bg-white border border-[#D8D2C6] rounded-xl px-5 py-5">
+      <p className="text-[13px] text-stone mb-2">{label}</p>
+      <p className="text-2xl font-semibold text-carbon">{value}</p>
     </div>
   );
 }
 
 function PaymentBadge({ status }: { status: string }) {
   const styles: Record<string, string> = {
-    paid: "text-green-700 bg-green-50",
-    free: "text-charcoal bg-sand/60",
-    pending: "text-amber-700 bg-amber-50",
+    paid: "text-sea-green bg-mint",
+    free: "text-stone bg-[#D8D2C6]/50",
+    pending: "text-stone bg-[#D8D2C6]/50",
     refunded: "text-red-600 bg-red-50",
   };
   const labels: Record<string, string> = {
@@ -110,7 +110,7 @@ function PaymentBadge({ status }: { status: string }) {
     pending: "Pending",
     refunded: "Refunded",
   };
-  const cls = styles[status] ?? "text-muted bg-sand/50";
+  const cls = styles[status] ?? "text-stone bg-[#D8D2C6]/50";
   return (
     <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${cls}`}>
       {labels[status] ?? status}

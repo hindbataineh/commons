@@ -14,11 +14,11 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variantClasses: Record<Variant, string> = {
   primary:
-    "bg-terracotta text-white hover:bg-terracotta/90 active:bg-terracotta/80",
+    "bg-carbon text-cream font-semibold hover:opacity-90 active:opacity-80",
   secondary:
-    "bg-cream text-charcoal border border-sand hover:bg-sand/50 active:bg-sand",
+    "bg-white text-carbon border border-[#D8D2C6] hover:bg-linen active:bg-linen",
   ghost:
-    "bg-transparent text-charcoal hover:bg-cream active:bg-sand",
+    "bg-transparent text-carbon hover:bg-linen active:bg-linen",
 };
 
 const sizeClasses: Record<Size, string> = {
@@ -45,7 +45,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         disabled={disabled || loading}
         className={cn(
-          "inline-flex items-center justify-center rounded-lg font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-terracotta/50 disabled:opacity-50 disabled:cursor-not-allowed",
+          "inline-flex items-center justify-center rounded-lg font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-carbon/30 disabled:opacity-50 disabled:cursor-not-allowed",
           variantClasses[variant],
           sizeClasses[size],
           className

@@ -24,8 +24,8 @@ export default async function AlertsPage() {
   return (
     <div className="p-8 max-w-3xl">
       <div className="mb-8">
-        <h1 className="text-2xl font-semibold text-charcoal">Alerts</h1>
-        <p className="text-sm text-muted mt-1">
+        <h1 className="text-[34px] font-semibold tracking-tight text-carbon">Alerts</h1>
+        <p className="text-[15px] text-stone mt-1">
           {totalAlerts === 0 ? "Nothing needs attention right now." : `${totalAlerts} thing${totalAlerts !== 1 ? "s" : ""} need your attention.`}
         </p>
       </div>
@@ -43,14 +43,14 @@ export default async function AlertsPage() {
             <ul className="flex flex-col gap-1 mt-3">
               {quietMembers.slice(0, 8).map((m) => (
                 <li key={m.id} className="flex items-center justify-between text-sm">
-                  <span className="text-charcoal">{m.name}</span>
-                  <span className="text-muted text-xs">
+                  <span className="text-carbon">{m.name}</span>
+                  <span className="text-stone text-[13px]">
                     {m.last_attended ? `Last seen ${formatShortDate(m.last_attended)}` : "Never attended"}
                   </span>
                 </li>
               ))}
               {quietMembers.length > 8 && (
-                <li className="text-xs text-muted pt-1">+{quietMembers.length - 8} more</li>
+                <li className="text-[13px] text-stone pt-1">+{quietMembers.length - 8} more</li>
               )}
             </ul>
           )}
@@ -61,21 +61,21 @@ export default async function AlertsPage() {
           title="Waitlist demand"
           count={waitlistEvents.length}
           emptyMessage="No events have waitlisted members."
-          accentColor="terracotta"
+          accentColor="carbon"
           action={undefined}
         >
           {waitlistEvents.length > 0 && (
             <ul className="flex flex-col gap-2 mt-3">
               {waitlistEvents.map((ev) => (
                 <li key={ev.eventId} className="flex items-center justify-between text-sm">
-                  <span className="text-charcoal">{ev.eventName}</span>
+                  <span className="text-carbon">{ev.eventName}</span>
                   <div className="flex items-center gap-3">
-                    <span className="text-terracotta font-medium text-xs">
+                    <span className="text-stone font-medium text-[13px]">
                       {ev.count} waiting
                     </span>
                     <Link
                       href={`/dashboard/events`}
-                      className="text-xs text-muted hover:text-terracotta transition-colors"
+                      className="text-[13px] text-stone hover:text-sea-green transition-colors"
                     >
                       View →
                     </Link>
@@ -98,12 +98,12 @@ export default async function AlertsPage() {
             <ul className="flex flex-col gap-1 mt-3">
               {newMembers.slice(0, 8).map((m) => (
                 <li key={m.id} className="flex items-center justify-between text-sm">
-                  <span className="text-charcoal">{m.name}</span>
-                  <span className="text-muted text-xs">{m.email}</span>
+                  <span className="text-carbon">{m.name}</span>
+                  <span className="text-stone text-[13px]">{m.email}</span>
                 </li>
               ))}
               {newMembers.length > 8 && (
-                <li className="text-xs text-muted pt-1">+{newMembers.length - 8} more</li>
+                <li className="text-[13px] text-stone pt-1">+{newMembers.length - 8} more</li>
               )}
             </ul>
           )}
@@ -113,26 +113,26 @@ export default async function AlertsPage() {
   );
 }
 
-type AccentColor = "amber" | "terracotta" | "green";
+type AccentColor = "amber" | "carbon" | "green";
 
 const accentStyles: Record<AccentColor, { border: string; bg: string; badge: string; count: string }> = {
   amber: {
-    border: "border-amber-200",
-    bg: "bg-amber-50",
-    badge: "bg-amber-100 text-amber-800",
-    count: "text-amber-800",
+    border: "border-[#2A6B4D]",
+    bg: "bg-mint",
+    badge: "bg-[#2A6B4D]/10 text-sea-green",
+    count: "text-sea-green",
   },
-  terracotta: {
-    border: "border-terracotta/30",
-    bg: "bg-terracotta/5",
-    badge: "bg-terracotta/10 text-terracotta",
-    count: "text-terracotta",
+  carbon: {
+    border: "border-carbon/20",
+    bg: "bg-linen",
+    badge: "bg-carbon/10 text-carbon",
+    count: "text-carbon",
   },
   green: {
-    border: "border-green-200",
-    bg: "bg-green-50",
-    badge: "bg-green-100 text-green-800",
-    count: "text-green-800",
+    border: "border-[#2A6B4D]",
+    bg: "bg-mint",
+    badge: "bg-[#2A6B4D]/10 text-sea-green",
+    count: "text-sea-green",
   },
 };
 
@@ -157,12 +157,12 @@ function AlertCard({
   return (
     <div
       className={`rounded-xl border px-5 py-5 ${
-        hasAlert ? `${styles.border} ${styles.bg}` : "border-sand bg-white"
+        hasAlert ? `${styles.border} ${styles.bg}` : "border-[#D8D2C6] bg-white"
       }`}
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <h3 className="font-medium text-charcoal">{title}</h3>
+          <h3 className="font-semibold text-carbon">{title}</h3>
           {hasAlert && (
             <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${styles.badge}`}>
               {count}
@@ -170,13 +170,13 @@ function AlertCard({
           )}
         </div>
         {action && hasAlert && (
-          <Link href={action.href} className={`text-xs font-medium hover:underline ${styles.count}`}>
+          <Link href={action.href} className={`text-[13px] font-medium hover:underline ${styles.count}`}>
             {action.label}
           </Link>
         )}
       </div>
 
-      {!hasAlert && <p className="text-sm text-muted mt-2">{emptyMessage}</p>}
+      {!hasAlert && <p className="text-[15px] text-stone mt-2">{emptyMessage}</p>}
       {children}
     </div>
   );

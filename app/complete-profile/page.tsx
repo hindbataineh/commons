@@ -36,8 +36,8 @@ function generateSlug(name: string) {
 }
 
 const baseInput =
-  "w-full rounded-lg border border-sand bg-white px-4 py-2.5 text-sm text-charcoal placeholder:text-muted/50 focus:outline-none focus:border-charcoal focus:ring-1 focus:ring-charcoal/20 transition-colors";
-const baseLabel = "text-sm font-medium text-charcoal";
+  "w-full rounded-lg border border-[#D8D2C6] bg-white px-4 py-2.5 text-[15px] text-carbon placeholder:text-stone/50 focus:outline-none focus:border-carbon focus:ring-1 focus:ring-carbon/20 transition-colors";
+const baseLabel = "text-[13px] font-medium text-carbon";
 
 export default function CompleteProfilePage() {
   const [uid, setUid] = useState("");
@@ -86,7 +86,7 @@ export default function CompleteProfilePage() {
   if (!uid || !email) {
     return (
       <main className="min-h-screen bg-cream flex flex-col items-center justify-center gap-4 px-4">
-        <span className="font-display text-2xl text-charcoal">Commons</span>
+        <span className="font-semibold text-lg text-carbon tracking-tight">Commons</span>
         <p className="text-sm text-muted text-center">
           Something went wrong with your signup link.
         </p>
@@ -162,10 +162,10 @@ export default function CompleteProfilePage() {
   };
 
   return (
-    <main className="min-h-screen bg-cream px-4 py-12">
+    <main className="min-h-screen bg-linen px-4 py-12">
       <div className="max-w-lg mx-auto">
         <div className="mb-10">
-          <span className="font-display text-2xl text-charcoal">Commons</span>
+          <span className="font-semibold text-lg text-carbon tracking-tight">Commons</span>
           <p className="text-sm text-muted mt-1">Tell us about your community.</p>
         </div>
 
@@ -240,7 +240,7 @@ export default function CompleteProfilePage() {
             <label htmlFor="instagram" className={baseLabel}>
               Instagram handle
             </label>
-            <div className="flex items-center rounded-lg border border-sand bg-white px-4 py-2.5 focus-within:border-charcoal focus-within:ring-1 focus-within:ring-charcoal/20 transition-colors">
+            <div className="flex items-center rounded-lg border border-[#D8D2C6] bg-white px-4 py-2.5 focus-within:border-carbon focus-within:ring-1 focus-within:ring-carbon/20 transition-colors">
               <span className="text-sm text-stone-400 mr-1 select-none">@</span>
               <input
                 id="instagram"
@@ -318,7 +318,7 @@ export default function CompleteProfilePage() {
           <button
             type="submit"
             disabled={submitting}
-            className="w-full bg-charcoal text-cream rounded-lg px-5 py-3 text-sm font-medium hover:bg-charcoal/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-2"
+            className="w-full bg-carbon text-cream rounded-lg px-5 py-3 text-[16px] font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed mt-2"
           >
             {submitting ? "Creating your community…" : "Create my community"}
           </button>

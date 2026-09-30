@@ -19,7 +19,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   if (!community) redirect("/complete-profile");
 
   return (
-    <div className="flex min-h-screen bg-cream">
+    <div className="flex min-h-screen bg-linen">
       <Sidebar
         hostName={host?.name ?? user.email ?? "Host"}
         communityName={community.name}

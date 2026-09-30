@@ -334,7 +334,7 @@ export default function BookingForm({ eventId, hostSlug, eventSlug, isFree, isFu
     }
   }
 
-  const selectCls = "w-full rounded-lg border border-sand bg-white px-4 py-2.5 text-sm text-charcoal focus:outline-none focus:border-charcoal focus:ring-1 focus:ring-charcoal/20 transition-colors appearance-none";
+  const selectCls = "w-full rounded-lg border border-[#D8D2C6] bg-white px-4 py-2.5 text-[15px] text-carbon focus:outline-none focus:border-carbon focus:ring-1 focus:ring-carbon/20 transition-colors appearance-none";
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -356,14 +356,14 @@ export default function BookingForm({ eventId, hostSlug, eventSlug, isFree, isFu
 
       {/* WhatsApp: country code + number */}
       <div className="flex flex-col gap-1.5">
-        <label className="text-sm font-medium text-charcoal">
-          WhatsApp number<span className="text-terracotta ml-0.5">*</span>
+        <label className="text-[13px] font-medium text-carbon">
+          WhatsApp number<span className="text-red-500 ml-0.5">*</span>
         </label>
         <div className="flex gap-2">
           <select
             value={countryCode}
             onChange={(e) => setCountryCode(e.target.value)}
-            className="rounded-lg border border-sand bg-white px-3 py-2.5 text-sm text-charcoal focus:outline-none focus:border-charcoal focus:ring-1 focus:ring-charcoal/20 transition-colors shrink-0"
+            className="rounded-lg border border-[#D8D2C6] bg-white px-3 py-2.5 text-[15px] text-carbon focus:outline-none focus:border-carbon focus:ring-1 focus:ring-carbon/20 transition-colors shrink-0"
           >
             {COUNTRY_CODES.map(({ code, label }) => (
               <option key={code} value={code}>{label}</option>
@@ -376,15 +376,15 @@ export default function BookingForm({ eventId, hostSlug, eventSlug, isFree, isFu
             placeholder="50 123 4567"
             required
             autoComplete="tel-national"
-            className="w-full rounded-lg border border-sand bg-white px-4 py-2.5 text-sm text-charcoal placeholder:text-muted/60 focus:outline-none focus:border-charcoal focus:ring-1 focus:ring-charcoal/20 transition-colors"
+            className="w-full rounded-lg border border-[#D8D2C6] bg-white px-4 py-2.5 text-[15px] text-carbon placeholder:text-stone/50 focus:outline-none focus:border-carbon focus:ring-1 focus:ring-carbon/20 transition-colors"
           />
         </div>
       </div>
 
       {/* Gender */}
       <div className="flex flex-col gap-1.5">
-        <label className="text-sm font-medium text-charcoal">
-          Gender<span className="text-terracotta ml-0.5">*</span>
+        <label className="text-[13px] font-medium text-carbon">
+          Gender<span className="text-red-500 ml-0.5">*</span>
         </label>
         <select name="member_gender" defaultValue="" className={selectCls}>
           <option value="" disabled>Select gender</option>
@@ -396,8 +396,8 @@ export default function BookingForm({ eventId, hostSlug, eventSlug, isFree, isFu
 
       {/* Year of birth */}
       <div className="flex flex-col gap-1.5">
-        <label className="text-sm font-medium text-charcoal">
-          Year of birth<span className="text-terracotta ml-0.5">*</span>
+        <label className="text-[13px] font-medium text-carbon">
+          Year of birth<span className="text-red-500 ml-0.5">*</span>
         </label>
         <select name="member_birth_year" defaultValue="" className={selectCls}>
           <option value="" disabled>Select year</option>
@@ -409,7 +409,7 @@ export default function BookingForm({ eventId, hostSlug, eventSlug, isFree, isFu
 
       {error && (
         error.toLowerCase().includes("already booked") ? (
-          <p className="text-sm text-terracotta bg-terracotta/5 border border-terracotta/30 rounded-lg px-4 py-3">
+          <p className="text-sm text-carbon bg-mint border border-[#2A6B4D]/30 rounded-lg px-4 py-3">
             You&rsquo;re already registered for this event.
           </p>
         ) : (
@@ -430,7 +430,7 @@ export default function BookingForm({ eventId, hostSlug, eventSlug, isFree, isFu
       </Button>
 
       {!isFree && !isFull && (
-        <p className="text-xs text-center text-muted">
+        <p className="text-xs text-center text-stone">
           Secure payment via Stripe
         </p>
       )}

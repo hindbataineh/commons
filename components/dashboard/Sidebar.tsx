@@ -81,9 +81,9 @@ export default function Sidebar({ hostName, communityName }: Props) {
   }
 
   return (
-    <aside className="fixed left-0 top-0 h-screen w-56 bg-charcoal flex flex-col z-20">
+    <aside className="fixed left-0 top-0 h-screen w-56 bg-carbon flex flex-col z-20">
       <div className="px-6 pt-7 pb-6">
-        <span className="font-display text-2xl text-cream">Commons</span>
+        <span className="font-semibold text-lg text-cream tracking-tight">Commons</span>
       </div>
 
       <nav className="flex-1 px-3 flex flex-col gap-0.5">
@@ -93,8 +93,8 @@ export default function Sidebar({ hostName, communityName }: Props) {
             href={item.href}
             className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${
               isActive(item.href)
-                ? "bg-white/10 text-cream"
-                : "text-muted hover:bg-white/5 hover:text-sand"
+                ? "bg-white/10 text-gold"
+                : "text-cream/60 hover:bg-white/5 hover:text-cream"
             }`}
           >
             {item.icon}
@@ -105,10 +105,10 @@ export default function Sidebar({ hostName, communityName }: Props) {
 
       <div className="px-5 py-5 border-t border-white/10">
         <p className="text-sm text-cream truncate">{communityName}</p>
-        <p className="text-xs text-muted mt-0.5 truncate">{hostName}</p>
+        <p className="text-xs text-cream/50 mt-0.5 truncate">{hostName}</p>
         <button
           onClick={handleLogout}
-          className="flex items-center gap-1.5 text-xs text-muted hover:text-sand transition-colors mt-3"
+          className="flex items-center gap-1.5 text-xs text-cream/50 hover:text-cream transition-colors mt-3"
         >
           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />

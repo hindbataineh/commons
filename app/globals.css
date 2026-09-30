@@ -2,13 +2,26 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --linen: #EDE8E0;
+  --carbon: #1C1A17;
+  --gold: #E9B949;
+  --sea-green: #2A6B4D;
+  --white: #FFFFFF;
+  --cream: #F7F4EE;
+  --stone: #57524A;
+  --border: #D8D2C6;
+  --mint: #DCEBE2;
+}
+
 @layer base {
   * {
     box-sizing: border-box;
   }
 
   body {
-    background-color: #FDFCFA;
-    color: #1A1714;
+    font-family: var(--font-readex), sans-serif;
+    background-color: var(--linen);
+    color: var(--carbon);
   }
 }
