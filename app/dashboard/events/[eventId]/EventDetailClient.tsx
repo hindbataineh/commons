@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 
 type BookingRow = {
   id: string;
+  booking_ref: string | null;
   member_name: string;
   member_email: string;
   member_whatsapp: string | null;
@@ -316,6 +317,7 @@ export default function EventDetailClient({
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-sand">
+                  <th className="text-left px-5 py-3 text-xs text-muted font-medium">Booking ref</th>
                   <th className="text-left px-5 py-3 text-xs text-muted font-medium">Name</th>
                   <th className="text-left px-5 py-3 text-xs text-muted font-medium">Email</th>
                   <th className="text-left px-5 py-3 text-xs text-muted font-medium">WhatsApp</th>
@@ -328,6 +330,9 @@ export default function EventDetailClient({
                   const promoted = promotedIds.has(row.id);
                   return (
                     <tr key={row.id} className={i < waitlisted.length - 1 ? "border-b border-sand/60" : ""}>
+                      <td className="px-5 py-3">
+                        <span className="font-mono text-sm text-stone">{row.booking_ref || "—"}</span>
+                      </td>
                       <td className="px-5 py-3 text-charcoal font-medium">{row.member_name}</td>
                       <td className="px-5 py-3 text-muted">{row.member_email}</td>
                       <td className="px-5 py-3 text-muted">{row.member_whatsapp ?? "—"}</td>
@@ -372,6 +377,7 @@ function AttendeeTable({ rows }: { rows: BookingRow[] }) {
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-sand">
+            <th className="text-left px-5 py-3 text-xs text-muted font-medium">Booking ref</th>
             <th className="text-left px-5 py-3 text-xs text-muted font-medium">Name</th>
             <th className="text-left px-5 py-3 text-xs text-muted font-medium">Email</th>
             <th className="text-left px-5 py-3 text-xs text-muted font-medium">WhatsApp</th>
@@ -381,6 +387,9 @@ function AttendeeTable({ rows }: { rows: BookingRow[] }) {
         <tbody>
           {rows.map((row, i) => (
             <tr key={row.id} className={i < rows.length - 1 ? "border-b border-sand/60" : ""}>
+              <td className="px-5 py-3">
+                <span className="font-mono text-sm text-stone">{row.booking_ref || "—"}</span>
+              </td>
               <td className="px-5 py-3 text-charcoal font-medium">{row.member_name}</td>
               <td className="px-5 py-3 text-muted">{row.member_email}</td>
               <td className="px-5 py-3 text-muted">{row.member_whatsapp ?? "—"}</td>

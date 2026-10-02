@@ -31,7 +31,7 @@ export default async function EventAttendeesPage({ params }: Props) {
 
   const { data: bookings } = await svc
     .from("bookings")
-    .select("id, member_name, member_email, member_whatsapp, status, created_at")
+    .select("id, booking_ref, member_name, member_email, member_whatsapp, status, created_at")
     .eq("event_id", eventId)
     .in("status", ["confirmed", "waitlisted"])
     .order("created_at", { ascending: true });

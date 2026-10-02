@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createServiceClient } from "@/lib/supabase/server";
+import { createClient, createServiceClient } from "@/lib/supabase/server";
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
@@ -16,7 +16,12 @@ export async function POST(req: NextRequest) {
     website,
   } = body;
 
-  console.log('[setup] received:', { user_id, email, name, slug, type, location, instagram_handle, description: description?.length });
+  // Prefer session email as contact_email; fall back to the body param
+  const userClient = await createClient();
+  const { data: { user: sessionUser } } = await userClient.auth.getUser();
+  const contact_email = sessionUser?.email || email;
+
+  console.log('[setup] received:', { user_id, email, contact_email, name, slug, type, location, instagram_handle, description: description?.length });
 
   if (!user_id || !email || !name || !slug || !type || !location || !description || !instagram_handle) {
     console.log('[setup] missing fields check:', { user_id: !!user_id, email: !!email, name: !!name, slug: !!slug, type: !!type, location: !!location, description: !!description, instagram_handle: !!instagram_handle });
@@ -49,6 +54,7 @@ export async function POST(req: NextRequest) {
     description,
     instagram_handle,
     website: website || null,
+    contact_email,
   });
 
   console.log('[setup] community insert error:', communityError);
