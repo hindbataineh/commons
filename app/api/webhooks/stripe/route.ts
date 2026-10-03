@@ -66,7 +66,7 @@ export async function POST(req: NextRequest) {
     .single();
 
   // Create booking
-  await supabase.from("bookings").insert({
+  const { error: insertError } = await supabase.from("bookings").insert({
     event_id,
     member_name,
     member_email,
@@ -77,6 +77,10 @@ export async function POST(req: NextRequest) {
     amount_paid: session.amount_total ?? 0,
     booking_ref: booking_ref || null,
   });
+
+  if (insertError) {
+    console.error("[webhook] booking insert error:", insertError);
+  }
 
   // Upsert member
   if (community_id) {
@@ -112,17 +116,33 @@ export async function POST(req: NextRequest) {
   }
 
   // Send confirmation email
-  if (eventRow && community) {
-    sendBookingConfirmation({
-      to: member_email,
-      memberName: member_name,
-      eventName: eventRow.name,
-      eventDate: formatDate(eventRow.event_date),
-      eventTime: formatTime(eventRow.event_time),
-      eventLocation: eventRow.location,
-      communityName: community.name,
-      bookingRef: booking_ref || undefined,
-    }).catch(console.error);
+  console.log("[webhook] booking confirmed, attempting email");
+  console.log("[webhook] member email:", member_email);
+  console.log("[webhook] event name:", eventRow?.name);
+
+  if (!eventRow || !community) {
+    console.error("[webhook] skipping email — missing data", {
+      event_id,
+      community_id,
+      hasEvent: !!eventRow,
+      hasCommunity: !!community,
+    });
+  } else {
+    try {
+      const emailResult = await sendBookingConfirmation({
+        to: member_email,
+        memberName: member_name,
+        eventName: eventRow.name,
+        eventDate: formatDate(eventRow.event_date),
+        eventTime: formatTime(eventRow.event_time),
+        eventLocation: eventRow.location,
+        communityName: community.name,
+        bookingRef: booking_ref || undefined,
+      });
+      console.log("[webhook] email result:", JSON.stringify(emailResult));
+    } catch (emailError) {
+      console.error("[webhook] email error:", emailError);
+    }
   }
 
   return NextResponse.json({ received: true });
